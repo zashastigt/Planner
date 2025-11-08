@@ -16,13 +16,16 @@ function updateTime(dayKey, hourKey, index, value) {
 
 <template>
     <div class="timeTable">
-        <!-- <div class="timeRow">
-            <span class="time"></span>
-            <span class="time" v-for="(hour, hourKey) in timeTable['Mon']">{{ hourKey }}</span>
-        </div> -->
-        <div class="timeColumn" v-for="(day, dayKey) in timeTable">
+        <div class="timeColumn" v-for="(day, dayKey, index) in timeTable">
             <span>{{ dayKey }}</span>
-            <TimeCell v-for="(hour, hourKey) in day" :hour="hour" :hourKey="hourKey" :dayKey="dayKey" :updateTime="updateTime" />
+            <TimeCell
+                class="timeCell2"
+                v-for="(hour, hourKey) in day"
+                :hour="hour"
+                :hourKey="hourKey"
+                :dayKey="dayKey"
+                :index="index"
+                :updateTime="updateTime"/>
         </div>
     </div>
 </template>
@@ -31,7 +34,6 @@ function updateTime(dayKey, hourKey, index, value) {
     .timeRow {
         display: flex;
         flex-direction: column;
-        
     }
 
     .time {
@@ -43,13 +45,11 @@ function updateTime(dayKey, hourKey, index, value) {
     .timeTable {
         display: flex;
         user-select: none;
-        
     }
 
     .timeColumn {
         display: flex;
         flex-direction: column;
-        align-items: flex-end;
-        border-bottom: white solid 1px;
+        align-items: flex-end;  
     }
 </style>
