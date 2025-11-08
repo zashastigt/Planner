@@ -1,0 +1,4 @@
+services:
+  planner:
+    volumes:
+      - ./src:/usr/local/planner/src
