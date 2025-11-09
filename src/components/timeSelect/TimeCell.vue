@@ -1,39 +1,23 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
-
-const isMouseDown = ref(false);
 const props = defineProps([
     'hour',
     'hourKey',
     'dayKey',
     'index',
+    'isMouseDown',
     'updateTime'
 ])
 
 function handleMouseOver(selected, index) {
-    if (isMouseDown.value) {
+    if (props.isMouseDown) {
         changeColor(selected, index);
     }
-}
-
-function handleMouseDown() {
-    isMouseDown.value = !isMouseDown.value;
 }
 
 function changeColor(selected, index) {  
     selected = !selected;
     props.updateTime(props.dayKey, props.hourKey, index, selected)
 }
-
-onMounted(() => {
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', () => isMouseDown.value = false);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('mousedown', handleMouseDown);
-    window.removeEventListener('mouseup', () => isMouseDown.value = false);
-});
 </script>
 
 <template>

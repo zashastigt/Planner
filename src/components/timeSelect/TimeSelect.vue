@@ -2,16 +2,17 @@
 import TimeCell from './TimeCell.vue';
 import { useTimeStore } from '../../store/store';
 import { storeToRefs } from 'pinia';
+import { useMouseHold } from '../../snippets/mouse';
 
 const timeStore = useTimeStore()
 const { timeTable } = storeToRefs(timeStore)
+
+const isMouseDown = useMouseHold()
 
 function updateTime(dayKey, hourKey, index, value) {
     timeTable.value
     timeTable.value[dayKey][hourKey][index] = value
 }
-
-
 </script>
 
 <template>
@@ -25,6 +26,7 @@ function updateTime(dayKey, hourKey, index, value) {
                 :hourKey="hourKey"
                 :dayKey="dayKey"
                 :index="index"
+                :isMouseDown="isMouseDown"
                 :updateTime="updateTime"/>
         </div>
     </div>
