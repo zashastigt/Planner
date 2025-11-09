@@ -11,3 +11,13 @@ export const useTimeStore = defineStore('time', () => {
 
     return { timeTable, updateTimeTable }
 })
+
+export const useNameStore = defineStore('name', () => {
+    const name = ref('')
+
+    function updateName(newName) {
+        name.value = newName
+    }
+
+    return { name, updateName }
+})
