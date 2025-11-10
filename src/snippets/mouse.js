@@ -4,17 +4,21 @@ export function useMouseHold() {
     const isMouseDown = ref(false);
 
     function handleMouseDown() {
-        isMouseDown.value = !isMouseDown.value;
+        isMouseDown.value = true;
+    }
+
+    function handleMouseUp() {
+        isMouseDown.value = false;
     }
 
     onMounted(() => {
         window.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mouseup', () => isMouseDown.value = false);
+        window.addEventListener('mouseup', handleMouseUp);
     });
 
     onUnmounted(() => {
         window.removeEventListener('mousedown', handleMouseDown);
-        window.removeEventListener('mouseup', () => isMouseDown.value = false);
+        window.removeEventListener('mouseup', handleMouseUp);
     });
 
     return isMouseDown
