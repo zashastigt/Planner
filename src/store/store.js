@@ -1,63 +1,57 @@
 import { defineStore } from "pinia";
 import availabilityTable from '../data/availabilityTable.json'
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 export const useTimeStore = defineStore('time', () => {
     const timeTable = ref(availabilityTable)
-    const timeTableColumnLength = ref(tableColumnLength())
-
-    function updateTimeTable(newTable) {
-        timeTable.value = newTable
-    }
-
-    function tableColumnLength() {
+    
+    const timeTableColumnLength = computed(() => {
         const days = Object.values(timeTable.value);
-        const hours = Object.keys(Object.values(days)[0])
-        const subHours = Object.keys(Object.values(hours)[0])
-        return subHours.length * hours.length;
-    }
+        if (days.length === 0) return 0;
+        
+        const firstDay = days[0];
+        const hours = Object.values(firstDay);
+        if (hours.length === 0) return 0;
+        
+        return hours.reduce((total, hour) => total + Object.keys(hour).length, 0);
+    })
 
-    return { timeTable, timeTableColumnLength, updateTimeTable }
+    return { timeTable, timeTableColumnLength }
 })
 
 export const useNameStore = defineStore('name', () => {
     const name = ref('')
 
-    function updateName(newName) {
-        name.value = newName
-    }
-
-    return { name, updateName }
+    return { name }
 })
 
 export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
     const timeCellColorIds = ref(new Set([]));
     const timeCellTempColorIds = ref(new Set([]));
-    const timeCellTempDeleteColorIds = new Set([]);
+    const timeCellTempDeleteColorIds = ref(new Set([]));
 
     function updateColorIds() {
         timeCellTempColorIds.value.forEach(value => timeCellColorIds.value.add(value));
-        timeCellTempDeleteColorIds.clear();
     }
 
-    function updateTempColorIds(startTimeCellId, lastTimeCellId) {
-        startTimeCellId = Number(startTimeCellId);
-        lastTimeCellId = Number(lastTimeCellId);
-        timeCellTempColorIds.value = new Set([])
+    function updateTempColorIds(startId, endId) {
+        startId = Number(startId);
+        endId = Number(endId);
 
-        let step = startTimeCellId <= lastTimeCellId ? 1 : -1;
-        
-        for (let i = startTimeCellId; (step > 0 && i <= lastTimeCellId) || (step < 0 && i >= lastTimeCellId); i += step) {
-            if (timeCellColorIds.value.has(i)) 
-            {
+        timeCellTempColorIds.value.clear()
+
+        const step = startId <= endId ? 1 : -1;
+
+        for (let i = startId; (step >= 0 && i <= endId) || (step <= 0 && i >= endId); i += step) {
+            if (timeCellColorIds.value.has(i)) {
                 timeCellColorIds.value.delete(i);
-                timeCellTempDeleteColorIds.add(i);
+                timeCellTempDeleteColorIds.value.add(i);
             }
             else {
-                if (!timeCellTempDeleteColorIds.has(i)) timeCellTempColorIds.value.add(i);
+                if (!timeCellTempDeleteColorIds.value.has(i)) timeCellTempColorIds.value.add(i);
             }
         }
     }
 
-    return { timeCellColorIds, timeCellTempColorIds, updateColorIds, updateTempColorIds }
+    return { timeCellColorIds, timeCellTempColorIds, timeCellTempDeleteColorIds, updateColorIds, updateTempColorIds }
 })

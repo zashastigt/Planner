@@ -5,13 +5,20 @@ import { storeToRefs } from 'pinia';
 import { useMouseHold } from '../../snippets/mouse';
 import { ref, provide } from "vue";
 
+// Stores
 const timeStore = useTimeStore()
+const timeCellIdsStore = useTimeCellIdsStore()
 const { timeTable } = storeToRefs(timeStore)
 
+// States
 const isMouseDown = useMouseHold()
-
-const timeCellIdsStore = useTimeCellIdsStore()
 const globalIdCounter = ref(-4)
+const startColumnIndex = ref(-1)
+const startTimeCellId = ref(-1)
+const previousLastTimeCellId = ref(-1)
+const isHoldingDown = ref(false)
+
+// Provide
 provide("getId", getId)
 
 function getId() {
@@ -19,51 +26,79 @@ function getId() {
   return globalIdCounter.value
 }
 
-function updateTime(dayKey, hourKey, index, value) {
-    timeTable.value
-    timeTable.value[dayKey][hourKey][index] = value
-}
-
-let startColumnIndex = -1;
-let startTimeCellId = -1;
-let previousLastTimeCellId = -1;
-let holdingDown = false;
-
 function handleMouseDown(firstTimeCell, columnIndex) {
-    startColumnIndex = columnIndex;
-    startTimeCellId = Number(firstTimeCell.target.id)
-
-    if (!startTimeCellId) {
-        if (!firstTimeCell.target.firstElementChild) return
-        startTimeCellId = firstTimeCell.target.firstElementChild.id
+    startColumnIndex.value = columnIndex;
+    
+    if (!firstTimeCell.target.classList.contains("timeCell")) {
+        startTimeCellId.value = -1
     }
-    previousLastTimeCellId = startTimeCellId
-    holdingDown = true;
-    timeCellIdsStore.updateTempColorIds(startTimeCellId, startTimeCellId)
+    else {
+        startTimeCellId.value = Number(firstTimeCell.target.id)
+    }
+
+    previousLastTimeCellId.value = startTimeCellId.value
+    isHoldingDown.value = true;
+    timeCellIdsStore.updateTempColorIds(startTimeCellId.value, startTimeCellId.value)
 }
 
 function handleMouseOver(lastTimeCell, columnIndex) {
-    if (!holdingDown) return;
+    if (!isHoldingDown.value || !lastTimeCell.target.classList.contains("timeCell")) return;
+
     let lastTimeCellId = Number(lastTimeCell.target.id)
 
-    if (!lastTimeCellId) {
-        console.log(`${startTimeCellId} ${lastTimeCellId} ${previousLastTimeCellId} ${lastTimeCellId - timeStore.timeTableColumnLength * -(startColumnIndex - columnIndex)}`)
-        lastTimeCellId = previousLastTimeCellId
+    if (!lastTimeCellId && lastTimeCellId != 0) {
+        lastTimeCellId = previousLastTimeCellId.value
+    }
+   
+    // Cross column selection
+    if (startColumnIndex.value !== columnIndex && lastTimeCellId != previousLastTimeCellId.value) {
+        lastTimeCellId = lastTimeCellId - timeStore.timeTableColumnLength * -(startColumnIndex.value - columnIndex)
+    }
+
+    if (startTimeCellId.value == -1 && lastTimeCellId != -1) {
+        startTimeCellId.value = lastTimeCellId
     }
     
-    if (startColumnIndex !== columnIndex && lastTimeCellId != previousLastTimeCellId) {
-        lastTimeCellId = lastTimeCellId - timeStore.timeTableColumnLength * -(startColumnIndex - columnIndex)
-        console.log(lastTimeCellId)
-    }
-    previousLastTimeCellId = lastTimeCellId
-    timeCellIdsStore.updateTempColorIds(startTimeCellId, lastTimeCellId)
+    previousLastTimeCellId.value = lastTimeCellId
+    timeCellIdsStore.updateTempColorIds(startTimeCellId.value, lastTimeCellId)    
 }
 
 function handleMouseGone() {
-    holdingDown = false;
-
+    isHoldingDown.value = false;
     timeCellIdsStore.updateColorIds()
+
+    if (startTimeCellId.value == -1) return;
+
+    setTimeCellIsActiveInJson(timeCellIdsStore.timeCellTempDeleteColorIds, false)
+    setTimeCellIsActiveInJson(timeCellIdsStore.timeCellColorIds, true)
+    timeCellIdsStore.timeCellTempDeleteColorIds.clear()
 }
+
+function setTimeCellIsActiveInJson(cellIds, isActive) {
+    const days = timeTable.value;
+    const dayKeys = Object.keys(days)
+    const dayKey = dayKeys[startColumnIndex.value];
+    const day = days[dayKey];
+
+    for (const cellId of cellIds) {
+        const { cellBlock, cellIndex } = parseCellId(cellId)
+        const hourKey = Object.keys(day)[cellBlock];
+        const subHourKey = Object.keys(day[hourKey])[cellIndex];
+        
+        day[hourKey][subHourKey] = isActive;
+    }
+}
+
+function parseCellId(cellId) {
+    const columnNumber = Math.floor(cellId / timeStore.timeTableColumnLength)
+    const cellBlock = Math.floor((cellId - columnNumber * timeStore.timeTableColumnLength) / 4);
+    const cellIndex = (cellId - columnNumber * timeStore.timeTableColumnLength) % 4;
+    return { cellBlock, cellIndex }
+}
+
+defineExpose({
+  handleMouseGone
+});
 
 </script>
 
@@ -71,9 +106,7 @@ function handleMouseGone() {
     <div class="timeTable">
         <div class="timeColumn" v-for="(day, dayKey, index) in timeTable"
             @mousedown="(e) => handleMouseDown(e, index)"
-            @mouseover="(e) => handleMouseOver(e, index)"
-            @mouseup="() => handleMouseGone()"
-            >
+            @mouseover="(e) => handleMouseOver(e, index)">
             <span>{{ dayKey }}</span>
             <TimeCell
                 class="timeCell2"
@@ -83,8 +116,7 @@ function handleMouseGone() {
                 :dayKey="dayKey"
                 :index="index"
                 :hourIndex="hourIndex"
-                :isMouseDown="isMouseDown"
-                :updateTime="updateTime"/>
+                :isMouseDown="isMouseDown"/>
         </div>
     </div>
 </template>
