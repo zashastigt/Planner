@@ -11,3 +11,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       network: host
+  planner-db:
+    image: mariadb:12.0.2
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - ./database/planner-db.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./database/data:/var/lib/mysql

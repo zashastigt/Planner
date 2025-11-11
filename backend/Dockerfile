@@ -2,6 +2,8 @@ FROM node:22.16
 WORKDIR /usr/local/planner-backend
 COPY . .
 
+RUN npm i -g @nestjs/cli
+
 RUN npm i
 
 RUN npm run build

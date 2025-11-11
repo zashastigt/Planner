@@ -18,3 +18,11 @@ services:
       - ./backend/tsconfig.json:/usr/local/planner-backend/tsconfig.json
     ports:
       - "3000:3000"
+    command: "npm run start:dev"
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      - PMA_ARBITRARY=1
