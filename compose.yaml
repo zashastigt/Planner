@@ -1,8 +1,13 @@
 services:
   planner:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
       network: host
     ports:
       - "8080:8080"
+  planner-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      network: host
