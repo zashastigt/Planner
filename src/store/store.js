@@ -3,7 +3,9 @@ import availabilityTable from '../data/availabilityTable.json'
 import { ref, computed } from "vue";
 
 export const useTimeStore = defineStore('time', () => {
-    const timeTable = ref(availabilityTable)
+    const timeJson = ref(availabilityTable)
+    const name = ref(timeJson.value.name)
+    const timeTable = ref(timeJson.value.table)
     
     const timeTableColumnLength = computed(() => {
         const days = Object.values(timeTable.value);
@@ -16,13 +18,7 @@ export const useTimeStore = defineStore('time', () => {
         return hours.reduce((total, hour) => total + Object.keys(hour).length, 0);
     })
 
-    return { timeTable, timeTableColumnLength }
-})
-
-export const useNameStore = defineStore('name', () => {
-    const name = ref('')
-
-    return { name }
+    return { name, timeTable, timeTableColumnLength }
 })
 
 export const useTimeCellIdsStore = defineStore('timeCellIds', () => {

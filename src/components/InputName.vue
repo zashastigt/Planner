@@ -1,10 +1,10 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { useNameStore } from '../store/store';
+import { useTimeStore } from '../store/store';
 
 
-const nameStore = useNameStore()
-const { name } = storeToRefs(nameStore)
+const timeStore = useTimeStore()
+const { name } = storeToRefs(timeStore)
 
 console.log(name.value);
 </script>
