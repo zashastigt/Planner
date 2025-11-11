@@ -6,7 +6,6 @@ import { useTimeStore } from '../store/store';
 const timeStore = useTimeStore()
 const { name } = storeToRefs(timeStore)
 
-console.log(name.value);
 </script>
 
 <template>
