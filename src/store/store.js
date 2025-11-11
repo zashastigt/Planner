@@ -50,6 +50,11 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
             else {
                 if (!timeCellTempDeleteColorIds.value.has(startId)) timeCellTempColorIds.value.add(i);
             }
+            
+            if (timeCellColorIds.value.has(i) && timeCellTempColorIds.value.has(i)) {
+                timeCellColorIds.value.delete(i);
+                timeCellTempColorIds.value.add(i);
+            }
         }
     }
 
