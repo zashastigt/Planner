@@ -64,10 +64,10 @@ function handleMouseOver(lastTimeCell, columnIndex) {
 }
 
 function handleMouseGone() {
+    if (startTimeCellId.value == -1 || !isHoldingDown.value) return;
+    
     isHoldingDown.value = false;
     timeCellIdsStore.updateColorIds()
-
-    if (startTimeCellId.value == -1) return;
 
     setTimeCellIsActiveInJson(timeCellIdsStore.timeCellTempDeleteColorIds, false)
     setTimeCellIsActiveInJson(timeCellIdsStore.timeCellColorIds, true)

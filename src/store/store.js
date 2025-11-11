@@ -43,12 +43,12 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
         const step = startId <= endId ? 1 : -1;
 
         for (let i = startId; (step >= 0 && i <= endId) || (step <= 0 && i >= endId); i += step) {
-            if (timeCellColorIds.value.has(i)) {
+            if (timeCellColorIds.value.has(i) && (timeCellColorIds.value.has(startId) || timeCellTempDeleteColorIds.value.has(startId))) {
                 timeCellColorIds.value.delete(i);
                 timeCellTempDeleteColorIds.value.add(i);
             }
             else {
-                if (!timeCellTempDeleteColorIds.value.has(i)) timeCellTempColorIds.value.add(i);
+                if (!timeCellTempDeleteColorIds.value.has(startId)) timeCellTempColorIds.value.add(i);
             }
         }
     }
