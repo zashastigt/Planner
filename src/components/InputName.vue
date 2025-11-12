@@ -43,6 +43,7 @@ const { name } = storeToRefs(timeStore)
         height: 30px;
         border: none;
         width: 30px;
+        background-color: rgb(110, 110, 110);
     }
 
     .inputName button:hover {
@@ -50,7 +51,7 @@ const { name } = storeToRefs(timeStore)
     }
 
     .inputName button:active {
-        background-color: rgba(0, 0, 0, 0.1);
+        background-color: rgb(81, 81, 81);
     }
 
     .inputName button img {
