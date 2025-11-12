@@ -1,4 +1,5 @@
 <script setup>
+import Card from './components/Card.vue';
 import InputName from './components/InputName.vue';
 import TimeSelect from './components/timeSelect/TimeSelect.vue';
 import { ref } from "vue";
@@ -11,10 +12,13 @@ const handleMouse = ref(null);
 <template>
     <div id="container" 
     @mouseup="() => handleMouse.handleMouseGone()"
-    @mouseleave="() => handleMouse.handleMouseGone()"
-    >
-        <InputName />
-        <TimeSelect ref="handleMouse" />
+    @mouseleave="() => handleMouse.handleMouseGone()">
+        <Card title="name:">
+            <InputName />
+        </Card>
+        <Card title="table">
+            <TimeSelect ref="handleMouse" />
+        </Card>
     </div>
     
 </template>
