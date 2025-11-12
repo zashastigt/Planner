@@ -2,7 +2,6 @@
 import { storeToRefs } from 'pinia';
 import { useTimeStore } from '../store/store';
 
-
 const timeStore = useTimeStore()
 const { name } = storeToRefs(timeStore)
 
@@ -10,8 +9,10 @@ const { name } = storeToRefs(timeStore)
 
 <template>
     <div class="inputName">
-        <span>name: </span>
         <input type="text" v-model="name"></input>
+        <button @click="() => console.log('pressed')">
+            <img src="../assets/loginWhite.png" />
+        </button>
     </div>
     
 </template>
@@ -19,7 +20,34 @@ const { name } = storeToRefs(timeStore)
 <style scoped>
     .inputName {
         display: flex;
-        flex-direction: column;
         align-items: start;
+    }
+
+    .inputName input {
+        height: 30px;
+        border: none;
+        font-size: 1em;
+        border-radius: 0 0 0 20px;
+        padding: 0 20px;
+    }
+
+    .inputName input:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .inputName button {
+        height: 30px;
+        border: none;
+        width: 30px;
+    }
+
+    .inputName button:hover {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .inputName button img {
+        height: 18px;
+        margin-right: auto;
+        margin-top: 5px;
     }
 </style>

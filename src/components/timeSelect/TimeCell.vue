@@ -61,7 +61,12 @@ const childId = getId()
     border-bottom: white solid 1px;
 }
 
+.timeCell:hover {
+    background-color: #17aa4155 !important;
+}
+
 .hourText {
     margin-top: -11px;
+    margin-right: 5px;
 }
 </style>

@@ -107,9 +107,8 @@ defineExpose({
         <div class="timeColumn" v-for="(day, dayKey, index) in timeTable"
             @mousedown="(e) => handleMouseDown(e, index)"
             @mouseover="(e) => handleMouseOver(e, index)">
-            <span>{{ dayKey }}</span>
+            <span class="day">{{ dayKey }}</span>
             <TimeCell
-                class="timeCell2"
                 v-for="(hour, hourKey, hourIndex) in day"
                 :hour="hour"
                 :hourKey="hourKey"
@@ -136,11 +135,17 @@ defineExpose({
     .timeTable {
         display: flex;
         user-select: none;
+        margin: 20px;
+        color: aliceblue;
     }
 
     .timeColumn {
         display: flex;
         flex-direction: column;
         align-items: flex-end;  
+    }
+
+    .day {
+        margin-right: 7px;
     }
 </style>
