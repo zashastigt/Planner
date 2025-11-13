@@ -28,7 +28,6 @@ const handleMouse = ref(null);
 <style scoped>
     #container {
         display: flex;
-        align-items: flex-start;
         width: 100vw;
         min-height: 100vh;
         justify-content: center;
