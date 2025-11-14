@@ -22,6 +22,7 @@ function createPlanning() {
             mode="date"
             is-dark="isDark"
             color="green"
+            :first-day-of-week="2"
         />
         <button class="createButton" @click="createPlanning">create planning</button>
     </div>
