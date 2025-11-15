@@ -8,7 +8,7 @@ export default defineConfig({
     port: 8080,
     strictPort: true,
     host: true,
-    origin: ["http://localhost:8080", "https://planner.sibway.app"],
+    origin: "http://localhost:8080",
     allowedHosts: ["planner.sibway.app"]
   }
 })
