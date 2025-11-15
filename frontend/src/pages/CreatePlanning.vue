@@ -1,16 +1,29 @@
 <script setup>
 import dayjs from 'dayjs'
-import { Calendar, DatePicker } from 'v-calendar';
+import { DatePicker } from 'v-calendar';
 import { ref } from 'vue';
+import { router } from '../router.js';
 
 const date = ref({
     start: new Date(),
     end: new Date()
 })
 
-function createPlanning() {
-    console.log(dayjs(date.value.start).unix())
-    console.log(dayjs(date.value.end).unix())
+async function createPlanning() {
+    const response = await fetch(import.meta.env.VITE_API_ENDPOINT + "planning/create", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            startDate: dayjs(date.value.start).unix(),
+            endDate: dayjs(date.value.end).unix()
+        })
+    });
+    const planninId = await response.json();
+    router.push({ path: `/${planninId.id}`})
+    
+
 }
 
 </script>
