@@ -39,7 +39,6 @@ export class PlanningController {
 
   @Post(":id/availability/create")
   createAvailability(@Param('id') id: string, @Body() createAvailabilityDto: CreateAvailabilityDto) {
-    // return createAvailabilityDto
     return this.availabilityService.create(id, createAvailabilityDto);
   }
   @Get(":id/availability")

@@ -1,23 +1,23 @@
 <script setup>
+import { useTimeCellIdsStore } from '../../store/store';
+import { inject } from "vue";
+
 const props = defineProps([
     'hour',
     'hourKey',
     'dayKey',
     'index',
-    'isMouseDown',
-    'updateTime'
+    'hourIndex',
+    'isMouseDown'
 ])
 
-function handleMouseOver(selected, index) {
-    if (props.isMouseDown) {
-        changeColor(selected, index);
-    }
-}
+// Stores
+const timeCellIdsStore = useTimeCellIdsStore()
 
-function changeColor(selected, index) {  
-    selected = !selected;
-    props.updateTime(props.dayKey, props.hourKey, index, selected)
-}
+// Inject
+const getId = inject("getId")
+const childId = getId()
+
 </script>
 
 <template>
@@ -27,10 +27,9 @@ function changeColor(selected, index) {
             <div
                 class="timeCell"
                 v-for="(selected, index) in hour"
+                :id="childId + index"
                 :key="index"
-                @mouseover="() => handleMouseOver(selected, index)"
-                @mousedown="() => changeColor(selected, index)"
-                :style="{ backgroundColor: selected ? '#17aa41': 'transparent'}">
+                :style="{ backgroundColor: timeCellIdsStore.timeCellColorIds.has(childId + index) || timeCellIdsStore.timeCellTempColorIds.has(childId + index) ? '#17aa41' : 'transparent'}">
             </div>
             
         </div>
@@ -62,7 +61,12 @@ function changeColor(selected, index) {
     border-bottom: white solid 1px;
 }
 
+.timeCell:hover {
+    background-color: #17aa4155 !important;
+}
+
 .hourText {
     margin-top: -11px;
+    margin-right: 5px;
 }
 </style>
