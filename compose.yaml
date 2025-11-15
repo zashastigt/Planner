@@ -1,8 +1,21 @@
 services:
   planner:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
       network: host
     ports:
       - "8080:8080"
+  planner-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      network: host
+  planner-db:
+    image: mariadb:12.0.2
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - ./database/planner-db.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./database/data:/var/lib/mysql

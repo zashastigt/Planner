@@ -1,4 +1,28 @@
 services:
   planner:
     volumes:
-      - ./src:/usr/local/planner/src
+      - ./frontend/src:/usr/local/planner/src
+      - ./frontend/package.json:/usr/local/planner/package.json
+      - ./frontend/package-lock.json:/usr/local/planner/package-lock.json
+      - ./frontend/index.html:/usr/local/planner/index.html
+  planner-backend:
+    volumes:
+      - ./backend/.prettierrc:/usr/local/planner-backend/.prettierrc
+      - ./backend/src:/usr/local/planner-backend/src
+      - ./backend/test:/usr/local/planner-backend/test
+      - ./backend/eslint.config.mjs:/usr/local/planner-backend/eslint.config.mjs
+      - ./backend/nest-cli.json:/usr/local/planner-backend/nest-cli.json
+      - ./backend/package-lock.json:/usr/local/planner-backend/package-lock.json
+      - ./backend/package.json:/usr/local/planner-backend/package.json
+      - ./backend/tsconfig.build.json:/usr/local/planner-backend/tsconfig.build.json
+      - ./backend/tsconfig.json:/usr/local/planner-backend/tsconfig.json
+    ports:
+      - "3000:3000"
+    command: "npm run start:dev"
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      - PMA_ARBITRARY=1
