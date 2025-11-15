@@ -1,9 +1,10 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Availability } from 'src/availability/entities/availability.entity';
+import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class Planning {
     @PrimaryColumn()
-    planningId: string
+    id: string
 
     @Column()
     startDate: number
@@ -16,4 +17,7 @@ export class Planning {
         default: () => "CURRENT_TIMESTAMP"
     })
     creationDate: number
+
+    @OneToMany(()=> Availability, (availabililty) => availabililty.planning)
+    availability: Availability[]
 }

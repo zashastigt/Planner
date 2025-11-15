@@ -4,6 +4,7 @@ import { UpdatePlanningDto } from './dto/update-planning.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Planning } from './entities/planning.entity';
 import { Repository } from 'typeorm';
+import { nanoid } from 'nanoid'
 
 @Injectable()
 export class PlanningService {
@@ -14,6 +15,7 @@ export class PlanningService {
   ){}
 
   create(createPlanningDto: CreatePlanningDto) {
+    createPlanningDto.id = nanoid(15)
     return this.planningRepo.save(this.planningRepo.create(createPlanningDto))
   }
 
@@ -22,7 +24,7 @@ export class PlanningService {
   }
 
   findOne(id: string) {
-    return this.planningRepo.findOneBy({ planningId: id })
+    return this.planningRepo.findOneBy({ id })
   }
 
   update(id: string, updatePlanningDto: UpdatePlanningDto) {

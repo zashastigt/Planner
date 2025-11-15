@@ -2,11 +2,14 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { PlanningService } from './planning.service';
 import { CreatePlanningDto } from './dto/create-planning.dto';
 import { UpdatePlanningDto } from './dto/update-planning.dto';
+import { AvailabilityService } from 'src/availability/availability.service';
+import { CreateAvailabilityDto } from 'src/availability/dto/create-availability.dto';
 
 @Controller('planning')
 export class PlanningController {
   constructor(
-    private readonly planningService: PlanningService
+    private readonly planningService: PlanningService,
+    private readonly availabilityService: AvailabilityService
   ) {}
 
   @Post("create")
@@ -32,5 +35,15 @@ export class PlanningController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.planningService.remove(id);
+  }
+
+  @Post(":id/availability/create")
+  createAvailability(@Param('id') id: string, @Body() createAvailabilityDto: CreateAvailabilityDto) {
+    // return createAvailabilityDto
+    return this.availabilityService.create(id, createAvailabilityDto);
+  }
+  @Get(":id/availability")
+  findAvailability(@Param('id') id: string) {
+    return this.availabilityService.findAvailabilityByPlanning(id);
   }
 }

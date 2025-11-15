@@ -1,5 +1,11 @@
+import { IsNotEmpty } from "class-validator"
+
 export class CreatePlanningDto {
-    planningId: string
+    id: string
+    
+    @IsNotEmpty()
     startDate: number
+
+    @IsNotEmpty()
     endDate: number
 }
