@@ -5,7 +5,7 @@ import InputName from '../components/InputName.vue';
 import TimeSelect from '../components/timeSelect/TimeSelect.vue';
 import { useTimeStore, useDBCallStore } from '../store/store';
 import { ref, onBeforeMount } from "vue";
-import { useRoute } from "vue-router";
+import { router } from "./../router.js";
 
 defineProps({
     planningId: Number
@@ -16,8 +16,8 @@ onBeforeMount(async () => {
     let planningDto = storedPlanningDto
 
     if (!planningDto) {
-        const url = useRoute()
-        const response = await fetch(import.meta.env.VITE_API_ENDPOINT + "planning/" + url.params.planningId)
+        const url = router.currentRoute._value
+        const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}`)
         planningDto = await response.json();
     }
     
@@ -45,8 +45,9 @@ function createJson(startDate, endDate) {
 
             for (let j = 0; j < betweenHours; j++) {
                 time = j > 23 ? time.add(1, 'd') : time
-                hourTime.push({ "checked": false, "timestamp": time.unix()})
+                let startTime = time;
                 time = time.add(60/betweenHours, 'm')
+                hourTime.push({ "checked": false, "timestampStart": startTime.unix(), "timestampEnd": time.unix()})
             }
 
             dayTime[currentHour.format('HH:mm')] = hourTime
