@@ -1,13 +1,19 @@
 import { defineStore } from "pinia";
-import availabilityTable from '../data/availabilityTable.json'
 import { ref, computed } from "vue";
 
 export const useTimeStore = defineStore('time', () => {
-    const timeJson = ref(availabilityTable)
-    const name = ref(timeJson.value.name)
-    const timeTable = ref(timeJson.value.table)
+    const timeJson = ref({})
+    const name = ref("")
+    const timeTable = ref({})
+
+    function setJson(json) {
+        timeJson.value = json
+        name.value = json.name
+        timeTable.value = json.table
+    }
     
     const timeTableColumnLength = computed(() => {
+        if (!timeTable) return;
         const days = Object.values(timeTable.value);
         if (days.length === 0) return 0;
         
@@ -18,7 +24,7 @@ export const useTimeStore = defineStore('time', () => {
         return hours.reduce((total, hour) => total + Object.keys(hour).length, 0);
     })
 
-    return { name, timeTable, timeTableColumnLength }
+    return { name, timeTable, timeTableColumnLength, setJson }
 })
 
 export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
@@ -55,4 +61,14 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
     }
 
     return { timeCellColorIds, timeCellTempColorIds, timeCellTempDeleteColorIds, updateColorIds, updateTempColorIds }
+})
+
+export const useDBCallStore = defineStore('dbCall', () => {
+    const storedPlanningDto = ref(null)
+
+    function setPlanningDto(planningDto) {
+        storedPlanningDto.value = planningDto
+    }
+
+    return {storedPlanningDto, setPlanningDto}
 })

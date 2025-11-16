@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { DatePicker } from 'v-calendar';
 import { ref } from 'vue';
 import { router } from '../router.js';
+import { useDBCallStore } from '../store/store';
 
 const date = ref({
     start: new Date(),
@@ -20,10 +21,10 @@ async function createPlanning() {
             endDate: dayjs(date.value.end).unix()
         })
     });
-    const planninId = await response.json();
-    router.push({ path: `/${planninId.id}`})
-    
-
+    const planningDto = await response.json();
+    const dbCallStore = useDBCallStore()
+    dbCallStore.setPlanningDto(planningDto)
+    router.push({ path: `/${planningDto.id}`})
 }
 
 </script>

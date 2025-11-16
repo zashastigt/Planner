@@ -29,7 +29,10 @@ const childId = getId()
                 v-for="(selected, index) in hour"
                 :id="childId + index"
                 :key="index"
-                :style="{ backgroundColor: timeCellIdsStore.timeCellColorIds.has(childId + index) || timeCellIdsStore.timeCellTempColorIds.has(childId + index) ? '#17aa41' : 'transparent'}">
+                :style="{ 
+                    backgroundColor: timeCellIdsStore.timeCellColorIds.has(childId + index) 
+                    || timeCellIdsStore.timeCellTempColorIds.has(childId + index) 
+                    ? '#17aa41' : 'transparent'}">
             </div>
             
         </div>
