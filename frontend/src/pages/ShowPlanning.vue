@@ -57,7 +57,6 @@ function createJson(startDate, endDate) {
         currentDay = currentDay.add(1, 'd')
     }
     timeStore.setJson(newDefaultJson)
-    console.log(newDefaultJson)
 }
 
 const handleMouse = ref(null);

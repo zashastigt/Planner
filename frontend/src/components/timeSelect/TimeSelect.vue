@@ -39,7 +39,7 @@ function handleMouseDown(firstTimeCell, columnIndex) {
 
     previousLastTimeCellId.value = startTimeCellId.value
     isHoldingDown.value = true;
-    timeCellIdsStore.updateTempColorIds(startTimeCellId.value, startTimeCellId.value)
+    timeCellIdsStore.updateTempIds(startTimeCellId.value, startTimeCellId.value)
 }
 
 function handleMouseOver(lastTimeCell, columnIndex) {
@@ -61,23 +61,23 @@ function handleMouseOver(lastTimeCell, columnIndex) {
     }
     
     previousLastTimeCellId.value = lastTimeCellId
-    timeCellIdsStore.updateTempColorIds(startTimeCellId.value, lastTimeCellId)    
+    timeCellIdsStore.updateTempIds(startTimeCellId.value, lastTimeCellId)    
 }
 
 function handleMouseGone() {
     if (startTimeCellId.value == -1 || !isHoldingDown.value) return;
     
     isHoldingDown.value = false;
-    timeCellIdsStore.updateColorIds()
+    timeCellIdsStore.mergeTempIds()
 
-    setTimeCellIsActiveInJson(timeCellIdsStore.timeCellTempDeleteColorIds, false)
-    setTimeCellIsActiveInJson(timeCellIdsStore.timeCellColorIds, true)
-    timeCellIdsStore.timeCellTempDeleteColorIds.clear()
+    setActiveInJsonByCellId(timeCellIdsStore.timeCellTempDeleteIds, false)
+    setActiveInJsonByCellId(timeCellIdsStore.timeCellIds, true)
+    timeCellIdsStore.timeCellTempDeleteIds.clear()
 
     sendAvailability()
 }
 
-function setTimeCellIsActiveInJson(cellIds, isActive) {
+function setActiveInJsonByCellId(cellIds, isActive) {
     const days = timeTable.value;
     const dayKeys = Object.keys(days)
     const dayKey = dayKeys[startColumnIndex.value];

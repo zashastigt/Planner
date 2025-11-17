@@ -1,16 +1,26 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { useTimeStore } from '../store/store';
+import { useTimeStore, useTimeCellIdsStore } from '../store/store';
+import { router } from '../router.js'
 
 const timeStore = useTimeStore()
 const { name } = storeToRefs(timeStore)
+
+async function requestUser() {
+    const url = router.currentRoute._value
+    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}/availability/${timeStore.name}`);
+    const availablilityTimes = await response.json()
+    const timeCellIdsStore = useTimeCellIdsStore()
+
+    timeCellIdsStore.enableIdsByTimestamps(availablilityTimes)
+}
 
 </script>
 
 <template>
     <div class="inputName">
         <input type="text" v-model="name"></input>
-        <button @click="() => console.log('pressed')">
+        <button @click="requestUser()">
             <img src="../assets/loginWhite.png" />
         </button>
     </div>

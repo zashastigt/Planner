@@ -30,8 +30,8 @@ const childId = getId()
                 :id="childId + index"
                 :key="index"
                 :style="{ 
-                    backgroundColor: timeCellIdsStore.timeCellColorIds.has(childId + index) 
-                    || timeCellIdsStore.timeCellTempColorIds.has(childId + index) 
+                    backgroundColor: timeCellIdsStore.timeCellIds.has(childId + index) 
+                    || timeCellIdsStore.timeCellTempIds.has(childId + index) 
                     ? '#17aa41' : 'transparent'}">
             </div>
             
