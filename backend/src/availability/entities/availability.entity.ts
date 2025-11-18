@@ -8,7 +8,9 @@ export class Availability {
     @PrimaryGeneratedColumn()
     id: number
 
-    @ManyToOne(() => Planning, (planning) => planning.availability)
+    @ManyToOne(() => Planning, (planning) => planning.availability, {
+        onDelete: "CASCADE"
+    })
     planning: Planning
 
     @Column()

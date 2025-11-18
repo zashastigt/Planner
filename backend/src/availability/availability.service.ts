@@ -23,8 +23,11 @@ export class AvailabilityService {
     if(!planning) throw new HttpException(`This planning doesn't exist`, HttpStatus.UNPROCESSABLE_ENTITY)
 
     createAvailabilityDto.planning = planning
-    const availability = await this.availabilityRepo.save(this.availabilityRepo.create(createAvailabilityDto))
-    // return createAvailabilityDto;
+    let availability = await this.availabilityRepo.findOneBy({planning, name: createAvailabilityDto.name})
+    
+    if(availability) this.availabilityRepo.delete({planning, name: createAvailabilityDto.name})
+    availability = await this.availabilityRepo.save(this.availabilityRepo.create(createAvailabilityDto))
+
     for(const time of createAvailabilityDto.times){
       this.timeService.create(availability, time)
     }
@@ -45,6 +48,4 @@ export class AvailabilityService {
   findAvailabilityByPlanning(id: string){
     return this.availabilityRepo.findBy({ planning: {id}})
   }
-
-
 }
