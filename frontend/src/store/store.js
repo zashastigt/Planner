@@ -62,6 +62,8 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
     }
 
     function enableIdsByTimestamps(timestamps) {
+        console.log(timestamps);
+        
         const timeStore = useTimeStore()
         const timeTable = timeStore.timeTable
         const hour = 60; // 60 minutes

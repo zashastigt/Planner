@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useMouseHold } from '../../snippets/mouse';
 import { ref, provide } from "vue";
 import { router } from "../../router.js";
+import { sendAvailability } from '../../snippets/fetchCalls.js';
 
 // Stores
 const timeStore = useTimeStore()
@@ -74,7 +75,7 @@ function handleMouseGone() {
     setActiveInJsonByCellId(timeCellIdsStore.timeCellIds, true)
     timeCellIdsStore.timeCellTempDeleteIds.clear()
 
-    sendAvailability()
+    sendAvailability(timeStore, timeTable)
 }
 
 function setActiveInJsonByCellId(cellIds, isActive) {
@@ -98,46 +99,6 @@ function parseCellId(cellId) {
     const cellBlock = Math.floor((cellId - columnNumber * timeStore.timeTableColumnLength) / betweenHours);
     const cellIndex = (cellId - columnNumber * timeStore.timeTableColumnLength) % betweenHours;
     return { cellBlock, cellIndex }
-}
-
-function readAvailableTimes() {
-    const allTimes = Object.values(timeTable.value);
-    const ranges = [];
-    let start = null;
-    let previous = null;
-
-    allTimes.forEach((day) => {
-        Object.values(day).forEach((hour) => {
-            Object.values(hour).forEach((time, i) => {
-                if (time.checked && start === null) start = time.timestampStart
-                if (!time.checked && start !== null) {
-                    ranges.push({startTime: start, endTime: previous});
-                    start = null;
-                }
-                previous = time.timestampEnd
-             })
-        })
-    });
-
-    if (start != null) ranges.push({startTime: start, endTime: previous})
-
-    return ranges;
-}
-
-async function sendAvailability() {
-    const availableTimes = readAvailableTimes()
-    const url = router.currentRoute._value
-
-    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}/availability/create`, {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name: timeStore.name,
-            times: availableTimes
-        })
-    });
 }
 
 defineExpose({

@@ -6,6 +6,7 @@ import TimeSelect from '../components/timeSelect/TimeSelect.vue';
 import { useTimeStore, useDBCallStore } from '../store/store';
 import { ref, onBeforeMount } from "vue";
 import { router } from "./../router.js";
+import { getAvailability } from '../snippets/fetchCalls.js';
 
 defineProps({
     planningId: Number
@@ -60,18 +61,24 @@ function createJson(startDate, endDate) {
 }
 
 const handleMouse = ref(null);
+
+const nameCheck = ref(false)
+const updateNameCheck = (newValue) => {
+    nameCheck.value = newValue
+}
 </script>
 
 <template>
     <div id="container" 
-    @mouseup="() => handleMouse.handleMouseGone()"
-    @mouseleave="() => handleMouse.handleMouseGone()">
-        <Card title="name:">
-            <InputName />
+    @mouseup="() => handleMouse?.handleMouseGone()"
+    @mouseleave="() => handleMouse?.handleMouseGone()">
+        <Card v-if="!nameCheck" title="name">
+            <InputName nameCheck="nameCheck" @updateNameCheck="updateNameCheck" />
         </Card>
-        <Card title="table">
+        <Card v-if="nameCheck" title="table">
             <TimeSelect ref="handleMouse" />
         </Card>
+        <button @click="getAvailability">get</button>
     </div>
     
 </template>

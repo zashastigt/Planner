@@ -4,28 +4,14 @@ import { DatePicker } from 'v-calendar';
 import { ref } from 'vue';
 import { router } from '../router.js';
 import { useDBCallStore } from '../store/store';
+import { createPlanning } from '../snippets/fetchCalls.js';
 
 const date = ref({
     start: new Date(),
     end: new Date()
 })
 
-async function createPlanning() {
-    const response = await fetch(import.meta.env.VITE_API_ENDPOINT + "planning/create", {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            startDate: dayjs(date.value.start).unix(),
-            endDate: dayjs(date.value.end).unix()
-        })
-    });
-    const planningDto = await response.json();
-    const dbCallStore = useDBCallStore()
-    dbCallStore.setPlanningDto(planningDto)
-    router.push({ path: `/${planningDto.id}`})
-}
+
 
 </script>
 
