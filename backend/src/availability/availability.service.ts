@@ -43,7 +43,19 @@ export class AvailabilityService {
   }
 
   findAvailabilityByPlanning(id: string){
-    return this.availabilityRepo.findBy({ planning: {id}})
+    return this.availabilityRepo.find({ 
+      select: {
+        name: true,
+        times: {
+          startTime: true,
+          endTime: true
+        }
+      },
+      where: {
+         planning: { id }
+        },
+      relations: ['times']
+    })
   }
 
   async findAvailabilityByPlanningAndName(id: string, userName: string){
