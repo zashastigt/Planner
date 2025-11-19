@@ -4,7 +4,6 @@ import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
 import { storeToRefs } from 'pinia';
 import { useMouseHold } from '../../snippets/mouse';
 import { ref, provide } from "vue";
-import { router } from "../../router.js";
 import { sendAvailability } from '../../snippets/fetchCalls.js';
 
 // Stores

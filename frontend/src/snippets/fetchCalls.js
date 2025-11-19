@@ -11,15 +11,15 @@ const urlId = () => {
     return planningId
 }
 
-export async function createPlanning() {
-    const response = await fetch(`${baseUrl}/${urlId()}/create`, {
+export async function createPlanning(date) {
+    const response = await fetch(`${baseUrl}/create`, {
         method: "POST",
         headers: {
         "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            startDate: dayjs(date.value.start).unix(),
-            endDate: dayjs(date.value.end).unix()
+            startDate: dayjs(date.start).unix(),
+            endDate: dayjs(date.end).unix()
         })
     });
     const planningDto = await response.json();
@@ -31,7 +31,8 @@ export async function createPlanning() {
 export async function getAvailability() {
     const response = await fetch(`${baseUrl}/${urlId()}/availability`);
     const availablilityTimes = await response.json()
-    console.log(availablilityTimes);
+    
+    return availablilityTimes
 }
 
 export async function sendAvailability(timeStore, timeTable) {

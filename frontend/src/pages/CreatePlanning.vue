@@ -24,7 +24,7 @@ const date = ref({
             color="green"
             :first-day-of-week="2"
         />
-        <button class="createButton" @click="createPlanning">create planning</button>
+        <button class="createButton" @click="createPlanning(date)">create planning</button>
     </div>
 </template>
 

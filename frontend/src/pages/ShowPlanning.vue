@@ -7,6 +7,8 @@ import { useTimeStore, useDBCallStore } from '../store/store';
 import { ref, onBeforeMount } from "vue";
 import { router } from "./../router.js";
 import { getAvailability } from '../snippets/fetchCalls.js';
+import ShowAvailibility from '../components/timeSelect/ShowAvailibility.vue';
+import { createAvailibilityJson } from '../snippets/createAvaililbilityJson.js';
 
 defineProps({
     planningId: Number
@@ -17,7 +19,7 @@ onBeforeMount(async () => {
     let planningDto = storedPlanningDto
 
     if (!planningDto) {
-        const url = router.currentRoute._value
+        const url = router.currentRoute.value
         const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}`)
         planningDto = await response.json();
     }
@@ -30,34 +32,9 @@ onBeforeMount(async () => {
 
 function createJson(startDate, endDate) {
     const timeStore = useTimeStore()
-    const newDefaultJson = { "name": "", "table": {}}
-    const startTime = 15 //15:00
-    const endTime = 27 //3:00 next day, 24 hours + 3 hours
-    const betweenHours = 4 //15 minutes
-    let currentDay = startDate
-
-    while (currentDay.isBefore(endDate) || currentDay.isSame(endDate)) {
-        let time = currentDay.set('h', startTime).set('m', 0).set('s', 0)
-        const dayTime = {}
-             
-        for (let i = startTime; i <= endTime; i++) {
-            const hourTime = [];
-            const currentHour = time
-
-            for (let j = 0; j < betweenHours; j++) {
-                time = j > 23 ? time.add(1, 'd') : time
-                let startTime = time;
-                time = time.add(60/betweenHours, 'm')
-                hourTime.push({ "checked": false, "timestampStart": startTime.unix(), "timestampEnd": time.unix()})
-            }
-
-            dayTime[currentHour.format('HH:mm')] = hourTime
-        }
-               
-        newDefaultJson.table[currentDay.format("ddd")] = dayTime;
-        currentDay = currentDay.add(1, 'd')
-    }
-    timeStore.setJson(newDefaultJson)
+    const newJson = createAvailibilityJson(startDate, endDate)
+    
+    timeStore.setJson(newJson)
 }
 
 const handleMouse = ref(null);
@@ -72,13 +49,15 @@ const updateNameCheck = (newValue) => {
     <div id="container" 
     @mouseup="() => handleMouse?.handleMouseGone()"
     @mouseleave="() => handleMouse?.handleMouseGone()">
-        <Card v-if="!nameCheck" title="name">
+        <Card v-if="!nameCheck" title="Input your name">
             <InputName nameCheck="nameCheck" @updateNameCheck="updateNameCheck" />
         </Card>
-        <Card v-if="nameCheck" title="table">
+        <Card v-if="nameCheck" title="Your Availibility">
             <TimeSelect ref="handleMouse" />
         </Card>
-        <button @click="getAvailability">get</button>
+        <Card title="Group Availibility">
+            <ShowAvailibility />
+        </Card>
     </div>
     
 </template>
