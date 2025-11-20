@@ -19,7 +19,7 @@ import { TimeModule } from './time/time.module';
       password: 'root',
       database: 'planner',
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: true
     })
   ],
   controllers: [AppController],
