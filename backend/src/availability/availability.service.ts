@@ -46,5 +46,15 @@ export class AvailabilityService {
     return this.availabilityRepo.findBy({ planning: {id}})
   }
 
+  async findAvailabilityByPlanningAndName(id: string, userName: string){
+    const userAvailability = await this.availabilityRepo.findOne({
+      where: {
+          planning: {id},
+          name: userName
+      }
+    })
 
+    if (!userAvailability) return;
+    return this.timeService.findTimeByAvailability(userAvailability);
+  }
 }

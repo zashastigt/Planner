@@ -18,4 +18,16 @@ export class TimeService {
     createTimeDto.availability = availability
     this.timeRepo.save(this.timeRepo.create(createTimeDto))
   }
+
+  findTimeByAvailability(availability: Availability) {
+    return this.timeRepo.find({
+      select: {
+        startTime: true,
+        endTime: true
+      },
+      where: {
+          availability: availability,
+      }
+    })
+  }
 }
