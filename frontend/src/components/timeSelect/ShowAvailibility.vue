@@ -1,41 +1,42 @@
 <script setup>
-import { onBeforeMount, provide, reactive, ref } from 'vue';
-import { getAvailability } from '../../snippets/fetchCalls';
-import dayjs from 'dayjs';
+import { onBeforeMount, ref } from 'vue';
+import { getAvailability, getPlanning } from '../../snippets/fetchCalls';
 import { createAvailibilityJson } from '../../snippets/createAvaililbilityJson';
 import AvailibilityCell from '../AvailibilityCell.vue';
-import { useTimeStore } from '../../store/store';
-import { storeToRefs } from 'pinia';
-
+import { useDBCallStore, useJsonSizeStore, useTimeStore, useAvailabilityStore } from '../../store/store';
+import dayjs from 'dayjs';
 
 const timeStore = useTimeStore()
-const { timeTable } = storeToRefs(timeStore)
-const localTimeTable = reactive({...timeTable.value})
-
-console.log(timeTable.value);
-
-
 const availabilityJson = ref({})
-console.log(availabilityJson.value);
-
 
 onBeforeMount(async () => {
-    const availability = await getAvailability()
-    const name = availability[0]?.name
-    const start = dayjs.unix(availability[0]?.times[0].startTime)
-    const end = dayjs.unix(availability[0]?.times[0].endTime)
-    console.log(availability[0]?.name);
+    const { storedPlanningDto } = useDBCallStore()
+    const availabilityStore = useAvailabilityStore()
+    let planningDto = storedPlanningDto
+
+    if (!planningDto) {
+        planningDto = await getPlanning()
+    }
+    availabilityStore.availability = await getAvailability()
     
-    availabilityJson.value = createAvailibilityJson(start, end, name)
-    console.log(availabilityJson.value);
+    const startDate = dayjs.unix(planningDto.startDate)
+    const endDate = dayjs.unix(planningDto.endDate)
+
+    timeStore.setEditableJson(createJson(startDate, endDate))
+    availabilityJson.value = createJson(startDate, endDate, availabilityStore.availability)
 })
+
+function createJson(startDate, endDate, usersAvailabilities = []) {
+    const jsonSizeStore = useJsonSizeStore()
+    return createAvailibilityJson(startDate, endDate, jsonSizeStore.cellsBetweenHour, usersAvailabilities)
+}
 
 
 </script>
 
 <template>
     <div class="timeTable">
-        <div class="timeColumn" v-for="(day, dayKey, index) in availabilityJson.table">
+        <div class="timeColumn" v-for="(day, dayKey, index) in availabilityJson">
             <span class="day">{{ dayKey }}</span>
             <AvailibilityCell
                 v-for="(hour, hourKey, hourIndex) in day"
@@ -46,9 +47,34 @@ onBeforeMount(async () => {
                 :hourIndex="hourIndex"/>
         </div>
     </div>
-    <button @click="() => console.log(localTimeTable)">log</button>
 </template>
 
 <style scoped>
+    .timeRow {
+        display: flex;
+        flex-direction: column;
+    }
 
+    .time {
+        display: flex;
+        align-items: flex-end;
+        height: 34px;        
+    }
+
+    .timeTable {
+        display: flex;
+        user-select: none;
+        margin: 20px;
+        color: aliceblue;
+    }
+
+    .timeColumn {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;  
+    }
+
+    .day {
+        margin-right: 7px;
+    }
 </style>

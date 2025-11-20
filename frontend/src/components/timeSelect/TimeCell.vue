@@ -1,6 +1,5 @@
 <script setup>
-import { useTimeCellIdsStore } from '../../store/store';
-import { inject } from "vue";
+import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
 
 const props = defineProps([
     'hour',
@@ -13,10 +12,7 @@ const props = defineProps([
 
 // Stores
 const timeCellIdsStore = useTimeCellIdsStore()
-
-// Inject
-const getId = inject("getId")
-const childId = getId()
+const timeStore = useTimeStore()
 
 </script>
 
@@ -27,12 +23,12 @@ const childId = getId()
             <div
                 class="timeCell"
                 v-for="(selected, index) in hour"
-                :id="childId + index"
+                :id="timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart"
                 :key="index"
-                :style="{ 
-                    backgroundColor: timeCellIdsStore.timeCellIds.has(childId + index) 
-                    || timeCellIdsStore.timeCellTempIds.has(childId + index) 
-                    ? '#17aa41' : 'transparent'}">
+                :style="{ backgroundColor: 
+                    timeCellIdsStore.timeCellIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) || 
+                    timeCellIdsStore.timeCellTempIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) ? 
+                    '#17aa41' : 'transparent'}">
             </div>
             
         </div>

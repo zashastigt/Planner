@@ -17,7 +17,7 @@ const props = defineProps([
             <div
                 class="timeCell"
                 v-for="(selected, index) in hour"
-                @click="() => console.log(selected)"
+                @click="() => console.log(selected.userList)"
                 :key="index"
                 :style="{ backgroundColor: selected.checked ? '#17aa41' : 'transparent'}">
             </div>

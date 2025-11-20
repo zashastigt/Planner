@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { router } from '../router.js';
-import { useDBCallStore, useTimeCellIdsStore } from '../store/store';
+import { useDBCallStore } from '../store/store';
 import { readAvailableTimes } from './readAvailableTimes.js';
 
 const baseUrl = `${import.meta.env.VITE_API_ENDPOINT}planning`
@@ -28,6 +28,12 @@ export async function createPlanning(date) {
     router.push({ path: `/${planningDto.id}`})
 }
 
+export async function getPlanning() {
+    const url = router.currentRoute.value
+    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}`)
+    return await response.json();
+}
+
 export async function getAvailability() {
     const response = await fetch(`${baseUrl}/${urlId()}/availability`);
     const availablilityTimes = await response.json()
@@ -35,7 +41,7 @@ export async function getAvailability() {
     return availablilityTimes
 }
 
-export async function sendAvailability(timeStore, timeTable) {
+export async function sendAvailability(name, timeTable) {
     const availableTimes = readAvailableTimes(timeTable)
 
     await fetch(`${baseUrl}/${urlId()}/availability/create`, {
@@ -44,16 +50,8 @@ export async function sendAvailability(timeStore, timeTable) {
         "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            name: timeStore.name,
+            name: name,
             times: availableTimes
         })
     });
-}
-
-export async function requestUser(timeStore) {
-    const response = await fetch(`${baseUrl}/${urlId()}/availability/${timeStore.name}`);
-    const availablilityTimes = await response.json()
-    const timeCellIdsStore = useTimeCellIdsStore()
-
-    timeCellIdsStore.enableIdsByTimestamps(availablilityTimes)
 }

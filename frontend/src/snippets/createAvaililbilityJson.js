@@ -1,31 +1,62 @@
-export function createAvailibilityJson(startDate, endDate, name = "") {
-    const newDefaultJson = { "name": name, "table": {}}
-    const startTime = 15 //15:00
-    const endTime = 27 //3:00 next day, 24 hours + 3 hours
-    const betweenHours = 4 //15 minutes
-    let currentDay = startDate
+import dayjs from 'dayjs';
 
-    while (currentDay.isBefore(endDate) || currentDay.isSame(endDate)) {
-        let time = currentDay.set('h', startTime).set('m', 0).set('s', 0)
-        const dayTime = {}
+export function createAvailibilityJson(startDate, endDate, cellsBetweenHour, usersAvailabilities) {
+    const resultJson = {}
+    const TIME_START = 15 //15:00
+    const TIME_END = 27 //3:00 next day, 24 hours + 3 hours
+    const MINUTES_BETWEEN = 60 / cellsBetweenHour;
+    let day = startDate
+
+    while (day.isBefore(endDate) || day.isSame(endDate)) {
+        let time = day
+        .hour(TIME_START)
+        .minute(0)
+        .second(0);
+
+        const dayTable = {}
              
-        for (let i = startTime; i <= endTime; i++) {
+        for (let i = TIME_START; i <= TIME_END; i++) {
             const hourTime = [];
             const currentHour = time
 
-            for (let j = 0; j < betweenHours; j++) {
-                time = j > 23 ? time.add(1, 'd') : time
-                let startTime = time;
-                time = time.add(60/betweenHours, 'm')
-                hourTime.push({ "checked": false, "timestampStart": startTime.unix(), "timestampEnd": time.unix()})
+            for (let j = 0; j < cellsBetweenHour; j++) {
+                const startTime = time;
+                time = time.add(MINUTES_BETWEEN, 'm')
+
+                hourTime.push({ 
+                    "checked": false, 
+                    "timestampStart": startTime.unix(), 
+                    "timestampEnd": time.unix(), 
+                    "userList": []})
             }
 
-            dayTime[currentHour.format('HH:mm')] = hourTime
+            dayTable[currentHour.format('HH:mm')] = hourTime
         }
                
-        newDefaultJson.table[currentDay.format("ddd")] = dayTime;
-        currentDay = currentDay.add(1, 'd')
+        resultJson[day.format("ddd")] = dayTable;
+        day = day.add(1, 'd')
     }
-    return newDefaultJson
+
+    for (const user of usersAvailabilities) {
+        for (const userTime of user.times) {
+            let currentTime = dayjs.unix(userTime.startTime)
+            const endTime = dayjs.unix(userTime.endTime)
+
+            const dayKey = currentTime.format('ddd');
+            while (currentTime.isBefore(endTime)) {
+                const hourKey = currentTime.format('HH:00');
+                const betweenHourKey = currentTime.format('mm') / MINUTES_BETWEEN;
+
+                const newJsonTime = resultJson[dayKey][hourKey][betweenHourKey]
+
+                newJsonTime['userList'].push(user.name)
+                newJsonTime.checked = newJsonTime['userList'].length === usersAvailabilities.length
+
+                currentTime = currentTime.add(MINUTES_BETWEEN, 'm')
+            }
+        }
+    }
+
+    return resultJson
     
 }

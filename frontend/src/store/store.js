@@ -3,35 +3,36 @@ import { ref, computed } from "vue";
 import dayjs from 'dayjs';
 
 export const useTimeStore = defineStore('time', () => {
-    const timeJson = ref({})
     const name = ref("")
-    const timeTable = ref({})
+    const editableTimeTable = ref({})
+    const availabilityTimeTable = ref({})
 
-    function setJson(json) {
-        timeJson.value = json
-        name.value = json.name
-        timeTable.value = json.table
+    function setEditableJson(json) {
+        editableTimeTable.value = json
+    }
+
+    function setAvailabilityJson(json) {
+        availabilityTimeTable.value = json
     }
     
     const timeTableColumnLength = computed(() => {
-        if (!timeTable) return;
-        const days = Object.values(timeTable.value);
-        if (days.length === 0) return 0;
+        if (!editableTimeTable) return;
         
-        const firstDay = days[0];
-        const hours = Object.values(firstDay);
-        if (hours.length === 0) return 0;
-        
-        return hours.reduce((total, hour) => total + Object.keys(hour).length, 0);
+        const days = Object.values(editableTimeTable.value);      
+        let length = Object.values(days[1])[0][0].timestampStart - Object.values(days[0])[0][0].timestampStart
+
+        return length;
     })
 
-    return { name, timeTable, timeTableColumnLength, setJson }
+    return { name, editableTimeTable, timeTableColumnLength, availabilityTimeTable, setEditableJson, setAvailabilityJson }
 })
 
 export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
     const timeCellIds = ref(new Set([]));
     const timeCellTempIds = ref(new Set([]));
     const timeCellTempDeleteIds = ref(new Set([]));
+    const jsonSizeStore = useJsonSizeStore()
+    const SECONDS_BETWEEN_CELLS = jsonSizeStore.cellBlock * jsonSizeStore.cellBlock / jsonSizeStore.cellsBetweenHour; //15 mintues in seconds
 
     function mergeTempIds() {
         timeCellTempIds.value.forEach(value => timeCellIds.value.add(value));
@@ -43,7 +44,7 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
 
         timeCellTempIds.value.clear()
 
-        const step = startId <= endId ? 1 : -1;
+        const step = startId <= endId ? SECONDS_BETWEEN_CELLS : -SECONDS_BETWEEN_CELLS;
 
         for (let i = startId; (step >= 0 && i <= endId) || (step <= 0 && i >= endId); i += step) {
             if (timeCellIds.value.has(i) && (timeCellIds.value.has(startId) || timeCellTempDeleteIds.value.has(startId))) {
@@ -61,49 +62,44 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
         }
     }
 
-    function enableIdsByTimestamps(timestamps) {
-        console.log(timestamps);
+    function setTimeCellAndJsonActive(timestamps) {
+        const allTimestamps = []
         
-        const timeStore = useTimeStore()
-        const timeTable = timeStore.timeTable
-        const hour = 60; // 60 minutes
-        const betweenHour = 4; //4x 15 minutes
-
         timestamps.forEach(time => {
-            const startTime = dayjs.unix(time.startTime)
-            const endTime = dayjs.unix(time.endTime)
-            const daykey = startTime.format('ddd');
-            const startHourKey = startTime.format('HH:00')
-            const startSubHourKey = startTime.format('mm')
-            const endHourKey = endTime.format('HH:00')
-            const endSubHourKey = endTime.format('mm')
-            let currentTime = startTime
+            const startTime = time.startTime
+            const endTime = time.endTime
+            let currentTime = startTime         
 
-            const startCellId = parseCellId(timeTable, timeStore.timeTableColumnLength, daykey, startHourKey, startSubHourKey, hour, betweenHour)
-            const endCellId = parseCellId(timeTable, timeStore.timeTableColumnLength, daykey, endHourKey, endSubHourKey, hour, betweenHour)
+            while (currentTime < endTime) {
+                timeCellIds.value.add(currentTime);
+                allTimestamps.push(currentTime)
 
-            for (let cellId = startCellId; cellId < endCellId; cellId++) {
-                timeCellIds.value.add(cellId);
-            }
-
-            while (currentTime.isBefore(endTime)) {
-                timeTable[daykey][currentTime.format('HH:mm')]
-                timeTable[daykey][currentTime.format('HH:00')][currentTime.format('mm') / (hour / betweenHour)].checked = true;
-                currentTime = currentTime.add(60 / betweenHour, 'm')
+                currentTime += SECONDS_BETWEEN_CELLS;
             }
         });
-        console.log(timeTable)
+
+        setJsonActive(allTimestamps, true)
     }
 
-    function parseCellId(timeTable, columnLength, daykey, hourKey, subHourKey, hour, betweenHour) {
-        const columnNumber = Object.keys(timeTable).indexOf(daykey);
-        const cellBlock = Object.keys(timeTable[daykey]).indexOf(hourKey);
-        const cellIndex = subHourKey / (hour / betweenHour)
+    function setJsonActive(allTimestamps, isActive) {
+        const END_TABLE_RANGE = 3
+        const timeStore = useTimeStore()
+        
+        for (const timestamp of allTimestamps) {      
+            let time = dayjs.unix(timestamp)
+            
+            if (time.hour() <= END_TABLE_RANGE) time = time.subtract(1, 'd');
 
-        return columnNumber * columnLength + cellBlock * betweenHour + cellIndex
-    } 
+            const dayKey = time.format('ddd')
+            const hourKey = time.format('HH:00')
+            const subHourKey = time.format('m')
 
-    return { timeCellIds, timeCellTempIds, timeCellTempDeleteIds, mergeTempIds, updateTempIds, enableIdsByTimestamps }
+            timeStore.editableTimeTable[dayKey][hourKey][subHourKey / (jsonSizeStore.cellBlock / jsonSizeStore.cellsBetweenHour)].checked = isActive;
+        }
+        console.log(timeStore.editableTimeTable)
+    }
+
+    return { timeCellIds, timeCellTempIds, timeCellTempDeleteIds, mergeTempIds, updateTempIds, setTimeCellAndJsonActive, setJsonActive }
 })
 
 export const useDBCallStore = defineStore('dbCall', () => {
@@ -114,4 +110,17 @@ export const useDBCallStore = defineStore('dbCall', () => {
     }
 
     return {storedPlanningDto, setPlanningDto}
+})
+
+export const useJsonSizeStore = defineStore('jsonSize', () => {
+    const cellsBetweenHour = 4 // 4 x 15 minutes
+    const cellBlock = 60 // hour
+
+    return {cellsBetweenHour, cellBlock}
+})
+
+export const useAvailabilityStore = defineStore('availability', () => {
+    const availability = ref([])
+
+    return {availability}
 })

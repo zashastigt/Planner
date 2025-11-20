@@ -11,8 +11,6 @@ const date = ref({
     end: new Date()
 })
 
-
-
 </script>
 
 <template>
