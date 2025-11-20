@@ -17,24 +17,9 @@ export class PlanningController {
     return this.planningService.create(createPlanningDto);
   }
 
-  @Get()
-  findAll() {
-    return this.planningService.findAll();
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.planningService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePlanningDto: UpdatePlanningDto) {
-    return this.planningService.update(id, updatePlanningDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.planningService.remove(id);
   }
 
   @Post(":id/availability/create")
@@ -44,10 +29,5 @@ export class PlanningController {
   @Get(":id/availability")
   findAvailability(@Param('id') id: string) {
     return this.availabilityService.findAvailabilityByPlanning(id);
-  }
-
-    @Get(":id/availability/:user")
-  findUserAvailability(@Param('id') id: string, @Param('user') userName: string) {
-    return this.availabilityService.findAvailabilityByPlanningAndName(id, userName);
   }
 }

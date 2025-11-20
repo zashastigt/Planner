@@ -37,27 +37,19 @@ export class AvailabilityService {
     return this.availabilityRepo.find()
   }
 
-  update(id: string, updateAvailabilityDto: UpdateAvailabilityDto) {
-    return `This action updates a #${id} planning`;
-  }
-
-  remove(id: string) {
-    return `This action removes a #${id} planning`;
-  }
-
   findAvailabilityByPlanning(id: string){
-    return this.availabilityRepo.findBy({ planning: {id}})
-  }
-
-  async findAvailabilityByPlanningAndName(id: string, userName: string){
-    const userAvailability = await this.availabilityRepo.findOne({
+    return this.availabilityRepo.find({ 
+      select: {
+        name: true,
+        times: {
+          startTime: true,
+          endTime: true
+        }
+      },
       where: {
-          planning: {id},
-          name: userName
-      }
+         planning: { id }
+        },
+      relations: ['times']
     })
-
-    if (!userAvailability) return;
-    return this.timeService.findTimeByAvailability(userAvailability);
   }
 }

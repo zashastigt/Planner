@@ -3,29 +3,20 @@ import TimeCell from './TimeCell.vue';
 import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
 import { storeToRefs } from 'pinia';
 import { useMouseHold } from '../../snippets/mouse';
-import { ref, provide } from "vue";
-import { router } from "../../router.js";
+import { sendAvailability } from '../../snippets/fetchCalls.js';
+import { ref } from "vue";
 
 // Stores
 const timeStore = useTimeStore()
 const timeCellIdsStore = useTimeCellIdsStore()
-const { timeTable } = storeToRefs(timeStore)
+const { editableTimeTable } = storeToRefs(timeStore)
 
 // States
 const isMouseDown = useMouseHold()
-const globalIdCounter = ref(-4)
 const startColumnIndex = ref(-1)
 const startTimeCellId = ref(-1)
 const previousLastTimeCellId = ref(-1)
 const isHoldingDown = ref(false)
-
-// Provide
-provide("getId", getId)
-
-function getId() {
-  globalIdCounter.value += 4
-  return globalIdCounter.value
-}
 
 function handleMouseDown(firstTimeCell, columnIndex) {
     startColumnIndex.value = columnIndex;
@@ -70,74 +61,11 @@ function handleMouseGone() {
     isHoldingDown.value = false;
     timeCellIdsStore.mergeTempIds()
 
-    setActiveInJsonByCellId(timeCellIdsStore.timeCellTempDeleteIds, false)
-    setActiveInJsonByCellId(timeCellIdsStore.timeCellIds, true)
+    timeCellIdsStore.setJsonActive(timeCellIdsStore.timeCellTempDeleteIds, false)
+    timeCellIdsStore.setJsonActive(timeCellIdsStore.timeCellIds, true)
     timeCellIdsStore.timeCellTempDeleteIds.clear()
 
-    sendAvailability()
-}
-
-function setActiveInJsonByCellId(cellIds, isActive) {
-    const days = timeTable.value;
-    const dayKeys = Object.keys(days)
-    const dayKey = dayKeys[startColumnIndex.value];
-    const day = days[dayKey];
-
-    for (const cellId of cellIds) {
-        const { cellBlock, cellIndex } = parseCellId(cellId)
-        const hourKey = Object.keys(day)[cellBlock];
-        const subHourKey = Object.keys(day[hourKey])[cellIndex];
-        
-        day[hourKey][subHourKey].checked = isActive;
-    }
-}
-
-function parseCellId(cellId) {
-    const betweenHours = 4 //15 minutes
-    const columnNumber = Math.floor(cellId / timeStore.timeTableColumnLength)
-    const cellBlock = Math.floor((cellId - columnNumber * timeStore.timeTableColumnLength) / betweenHours);
-    const cellIndex = (cellId - columnNumber * timeStore.timeTableColumnLength) % betweenHours;
-    return { cellBlock, cellIndex }
-}
-
-function readAvailableTimes() {
-    const allTimes = Object.values(timeTable.value);
-    const ranges = [];
-    let start = null;
-    let previous = null;
-
-    allTimes.forEach((day) => {
-        Object.values(day).forEach((hour) => {
-            Object.values(hour).forEach((time, i) => {
-                if (time.checked && start === null) start = time.timestampStart
-                if (!time.checked && start !== null) {
-                    ranges.push({startTime: start, endTime: previous});
-                    start = null;
-                }
-                previous = time.timestampEnd
-             })
-        })
-    });
-
-    if (start != null) ranges.push({startTime: start, endTime: previous})
-
-    return ranges;
-}
-
-async function sendAvailability() {
-    const availableTimes = readAvailableTimes()
-    const url = router.currentRoute._value
-
-    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}/availability/create`, {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name: timeStore.name,
-            times: availableTimes
-        })
-    });
+    sendAvailability(timeStore.name, editableTimeTable)
 }
 
 defineExpose({
@@ -148,7 +76,7 @@ defineExpose({
 
 <template>
     <div class="timeTable">
-        <div class="timeColumn" v-for="(day, dayKey, index) in timeTable"
+        <div class="timeColumn" v-for="(day, dayKey, index) in editableTimeTable"
             @mousedown="(e) => handleMouseDown(e, index)"
             @mouseover="(e) => handleMouseOver(e, index)">
             <span class="day">{{ dayKey }}</span>

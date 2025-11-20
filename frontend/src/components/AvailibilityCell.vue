@@ -1,5 +1,4 @@
 <script setup>
-import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
 
 const props = defineProps([
     'hour',
@@ -7,12 +6,7 @@ const props = defineProps([
     'dayKey',
     'index',
     'hourIndex',
-    'isMouseDown'
 ])
-
-// Stores
-const timeCellIdsStore = useTimeCellIdsStore()
-const timeStore = useTimeStore()
 
 </script>
 
@@ -23,12 +17,9 @@ const timeStore = useTimeStore()
             <div
                 class="timeCell"
                 v-for="(selected, index) in hour"
-                :id="timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart"
+                @click="() => console.log(selected.userList)"
                 :key="index"
-                :style="{ backgroundColor: 
-                    timeCellIdsStore.timeCellIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) || 
-                    timeCellIdsStore.timeCellTempIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) ? 
-                    '#17aa41' : 'transparent'}">
+                :style="{ backgroundColor: selected.checked ? '#17aa41' : 'transparent'}">
             </div>
             
         </div>
@@ -58,10 +49,6 @@ const timeStore = useTimeStore()
 
 .timeCell:nth-child(4) {
     border-bottom: white solid 1px;
-}
-
-.timeCell:hover {
-    background-color: #17aa4155 !important;
 }
 
 .hourText {

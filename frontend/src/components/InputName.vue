@@ -1,18 +1,28 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { useTimeStore, useTimeCellIdsStore } from '../store/store';
-import { router } from '../router.js'
+import { useTimeStore, useTimeCellIdsStore, useAvailabilityStore } from '../store/store';
+
+const props = defineProps([
+    'nameCheck'
+])
+
+const emit = defineEmits()
 
 const timeStore = useTimeStore()
 const { name } = storeToRefs(timeStore)
 
-async function requestUser() {
-    const url = router.currentRoute._value
-    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}/availability/${timeStore.name}`);
-    const availablilityTimes = await response.json()
+function getTable() {
+    emit('updateNameCheck', true)
+    
     const timeCellIdsStore = useTimeCellIdsStore()
+    const availabilityStore = useAvailabilityStore()
 
-    timeCellIdsStore.enableIdsByTimestamps(availablilityTimes)
+    for (const user of availabilityStore.availability) {
+        if (user.name === name.value) {
+            timeCellIdsStore.setTimeCellAndJsonActive(user.times)
+            break;
+        }
+    }    
 }
 
 </script>
@@ -20,7 +30,7 @@ async function requestUser() {
 <template>
     <div class="inputName">
         <input type="text" v-model="name"></input>
-        <button @click="requestUser()">
+        <button @click="getTable()">
             <img src="../assets/loginWhite.png" />
         </button>
     </div>
