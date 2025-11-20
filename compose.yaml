@@ -8,6 +8,8 @@ services:
       - "8080:8080"
     depends_on:
      - planner-backend
+    volumes:
+      - ./.env:/usr/local/planner/.env
   planner-backend:
     build:
       context: ./backend
@@ -15,6 +17,8 @@ services:
       network: host
     depends_on:
      - planner-db
+    volumes:
+      - ./.env:/usr/local/planner-backend/.env
   planner-db:
     image: mariadb:12.0.2
     restart: always
