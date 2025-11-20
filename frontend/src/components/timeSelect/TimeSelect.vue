@@ -4,6 +4,7 @@ import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
 import { storeToRefs } from 'pinia';
 import { useMouseHold } from '../../snippets/mouse';
 import { ref, provide } from "vue";
+import { router } from "../../router.js";
 
 // Stores
 const timeStore = useTimeStore()
@@ -38,7 +39,7 @@ function handleMouseDown(firstTimeCell, columnIndex) {
 
     previousLastTimeCellId.value = startTimeCellId.value
     isHoldingDown.value = true;
-    timeCellIdsStore.updateTempColorIds(startTimeCellId.value, startTimeCellId.value)
+    timeCellIdsStore.updateTempIds(startTimeCellId.value, startTimeCellId.value)
 }
 
 function handleMouseOver(lastTimeCell, columnIndex) {
@@ -60,21 +61,23 @@ function handleMouseOver(lastTimeCell, columnIndex) {
     }
     
     previousLastTimeCellId.value = lastTimeCellId
-    timeCellIdsStore.updateTempColorIds(startTimeCellId.value, lastTimeCellId)    
+    timeCellIdsStore.updateTempIds(startTimeCellId.value, lastTimeCellId)    
 }
 
 function handleMouseGone() {
     if (startTimeCellId.value == -1 || !isHoldingDown.value) return;
     
     isHoldingDown.value = false;
-    timeCellIdsStore.updateColorIds()
+    timeCellIdsStore.mergeTempIds()
 
-    setTimeCellIsActiveInJson(timeCellIdsStore.timeCellTempDeleteColorIds, false)
-    setTimeCellIsActiveInJson(timeCellIdsStore.timeCellColorIds, true)
-    timeCellIdsStore.timeCellTempDeleteColorIds.clear()
+    setActiveInJsonByCellId(timeCellIdsStore.timeCellTempDeleteIds, false)
+    setActiveInJsonByCellId(timeCellIdsStore.timeCellIds, true)
+    timeCellIdsStore.timeCellTempDeleteIds.clear()
+
+    sendAvailability()
 }
 
-function setTimeCellIsActiveInJson(cellIds, isActive) {
+function setActiveInJsonByCellId(cellIds, isActive) {
     const days = timeTable.value;
     const dayKeys = Object.keys(days)
     const dayKey = dayKeys[startColumnIndex.value];
@@ -85,15 +88,56 @@ function setTimeCellIsActiveInJson(cellIds, isActive) {
         const hourKey = Object.keys(day)[cellBlock];
         const subHourKey = Object.keys(day[hourKey])[cellIndex];
         
-        day[hourKey][subHourKey] = isActive;
+        day[hourKey][subHourKey].checked = isActive;
     }
 }
 
 function parseCellId(cellId) {
+    const betweenHours = 4 //15 minutes
     const columnNumber = Math.floor(cellId / timeStore.timeTableColumnLength)
-    const cellBlock = Math.floor((cellId - columnNumber * timeStore.timeTableColumnLength) / 4);
-    const cellIndex = (cellId - columnNumber * timeStore.timeTableColumnLength) % 4;
+    const cellBlock = Math.floor((cellId - columnNumber * timeStore.timeTableColumnLength) / betweenHours);
+    const cellIndex = (cellId - columnNumber * timeStore.timeTableColumnLength) % betweenHours;
     return { cellBlock, cellIndex }
+}
+
+function readAvailableTimes() {
+    const allTimes = Object.values(timeTable.value);
+    const ranges = [];
+    let start = null;
+    let previous = null;
+
+    allTimes.forEach((day) => {
+        Object.values(day).forEach((hour) => {
+            Object.values(hour).forEach((time, i) => {
+                if (time.checked && start === null) start = time.timestampStart
+                if (!time.checked && start !== null) {
+                    ranges.push({startTime: start, endTime: previous});
+                    start = null;
+                }
+                previous = time.timestampEnd
+             })
+        })
+    });
+
+    if (start != null) ranges.push({startTime: start, endTime: previous})
+
+    return ranges;
+}
+
+async function sendAvailability() {
+    const availableTimes = readAvailableTimes()
+    const url = router.currentRoute._value
+
+    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}planning/${url.params.planningId}/availability/create`, {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: timeStore.name,
+            times: availableTimes
+        })
+    });
 }
 
 defineExpose({

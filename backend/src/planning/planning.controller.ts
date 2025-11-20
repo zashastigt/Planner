@@ -45,4 +45,9 @@ export class PlanningController {
   findAvailability(@Param('id') id: string) {
     return this.availabilityService.findAvailabilityByPlanning(id);
   }
+
+    @Get(":id/availability/:user")
+  findUserAvailability(@Param('id') id: string, @Param('user') userName: string) {
+    return this.availabilityService.findAvailabilityByPlanningAndName(id, userName);
+  }
 }
