@@ -4,6 +4,7 @@ import InputName from '../components/InputName.vue';
 import TimeSelect from '../components/timeSelect/TimeSelect.vue';
 import { ref } from "vue";
 import ShowAvailibility from '../components/timeSelect/ShowAvailibility.vue';
+import ColorPicker from '../components/ColorPicker.vue';
 
 defineProps({
     planningId: Number
@@ -30,6 +31,7 @@ const updateNameCheck = (newValue) => {
         <Card title="Group Availibility">
             <ShowAvailibility />
         </Card>
+        <ColorPicker />
     </div>
     
 </template>
