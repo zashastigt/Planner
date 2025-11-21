@@ -12,8 +12,8 @@ export default ({mode}) => {
       port: 8080,
       strictPort: true,
       host: true,
-      origin: env.FRONTEND_URL,
-      allowedHosts: [env.DOMAIN]
+      origin: env.VITE_FRONTEND_URL,
+      allowedHosts: [env.VITE_DOMAIN]
     }
   })
 }
