@@ -62,14 +62,33 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
         }
     }
 
+    function setTimeCellAndJsonActive(timestamps) {
+        const allTimestamps = []
+
+        timestamps.forEach(time => {
+            const startTime = time.startTime
+            const endTime = time.endTime
+            let currentTime = startTime
+
+            while (currentTime < endTime) {
+                timeCellIds.value.add(currentTime);
+                allTimestamps.push(currentTime)
+
+                currentTime += SECONDS_BETWEEN_CELLS;
+            }
+        });
+
+        setJsonActive(allTimestamps, true)
+    }
+
     function setJsonActive(allTimestamps, isActive) {
-        const END_TABLE_RANGE = 3
+        const jsonSizeStore = useJsonSizeStore()
         const timeStore = useTimeStore()
         
         for (const timestamp of allTimestamps) {      
             let time = dayjs.unix(timestamp)
             
-            if (time.hour() <= END_TABLE_RANGE) time = time.subtract(1, 'd');
+            if (time.hour() < jsonSizeStore.cellsBetweenHour) time = time.subtract(1, 'd');
 
             const dayKey = time.format('ddd')
             const hourKey = time.format('HH:00')
@@ -79,7 +98,7 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
         }
     }
 
-    return { timeCellIds, timeCellTempIds, timeCellTempDeleteIds, mergeTempIds, updateTempIds, setJsonActive }
+    return { timeCellIds, timeCellTempIds, timeCellTempDeleteIds, mergeTempIds, updateTempIds, setJsonActive, setTimeCellAndJsonActive }
 })
 
 export const useDBCallStore = defineStore('dbCall', () => {
@@ -97,4 +116,10 @@ export const useJsonSizeStore = defineStore('jsonSize', () => {
     const cellBlock = 60 // hour
 
     return {cellsBetweenHour, cellBlock}
+})
+
+export const useAvailabilityStore = defineStore('availability', () => {
+    const availability = ref([])
+
+    return {availability}
 })
