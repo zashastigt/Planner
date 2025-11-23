@@ -3,7 +3,7 @@ import { onBeforeMount, ref } from 'vue';
 import { getAvailability, getPlanning } from '../../snippets/fetchCalls';
 import { createAvailibilityJson } from '../../snippets/createAvaililbilityJson';
 import AvailibilityCell from '../AvailibilityCell.vue';
-import { useDBCallStore, useJsonSizeStore, useTimeStore } from '../../store/store';
+import { useDBCallStore, useJsonSizeStore, useTimeStore, useAvailabilityStore } from '../../store/store';
 import dayjs from 'dayjs';
 
 const timeStore = useTimeStore()
@@ -11,17 +11,20 @@ const availabilityJson = ref({})
 
 onBeforeMount(async () => {
     const { storedPlanningDto } = useDBCallStore()
+    const availabilityStore = useAvailabilityStore()
     let planningDto = storedPlanningDto
 
     if (!planningDto) {
         planningDto = await getPlanning()
     }
+
+    availabilityStore.availability = await getAvailability()
     
     const startDate = dayjs.unix(planningDto.startDate)
     const endDate = dayjs.unix(planningDto.endDate)
 
     timeStore.setEditableJson(createJson(startDate, endDate))
-    availabilityJson.value = createJson(startDate, endDate, await getAvailability())
+    availabilityJson.value = createJson(startDate, endDate, availabilityStore.availability)
     
     const eventSource = new EventSource(`${import.meta.env.VITE_API_ENDPOINT}planning/${planningDto.id}/sse`);
     eventSource.onmessage = ({data}) => {
