@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { useTimeStore, useTimeCellIdsStore, useAvailabilityStore } from '../store/store';
+import { useTimeStore } from '../store/store';
 
 const props = defineProps([
     'nameCheck'
@@ -12,17 +12,8 @@ const timeStore = useTimeStore()
 const { name } = storeToRefs(timeStore)
 
 function getTable() {
-    emit('updateNameCheck', true)
-    
-    const timeCellIdsStore = useTimeCellIdsStore()
-    const availabilityStore = useAvailabilityStore()
-
-    for (const user of availabilityStore.availability) {
-        if (user.name === name.value) {
-            timeCellIdsStore.setTimeCellAndJsonActive(user.times)
-            break;
-        }
-    }    
+    if (name.value.length === 0) return
+    emit('updateNameCheck', true) 
 }
 
 </script>

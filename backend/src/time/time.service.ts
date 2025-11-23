@@ -14,8 +14,8 @@ export class TimeService {
     private timeRepo: Repository<Time>
   ){}
 
-  create(availability: Availability, createTimeDto: CreateTimeDto) {
+  async create(availability: Availability, createTimeDto: CreateTimeDto) {
     createTimeDto.availability = availability
-    this.timeRepo.save(this.timeRepo.create(createTimeDto))
+    await this.timeRepo.save(this.timeRepo.create(createTimeDto))
   }
 }

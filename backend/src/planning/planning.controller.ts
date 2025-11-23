@@ -1,15 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Sse, MessageEvent } from '@nestjs/common';
 import { PlanningService } from './planning.service';
 import { CreatePlanningDto } from './dto/create-planning.dto';
-import { UpdatePlanningDto } from './dto/update-planning.dto';
 import { AvailabilityService } from 'src/availability/availability.service';
 import { CreateAvailabilityDto } from 'src/availability/dto/create-availability.dto';
+import { Observable, fromEvent } from 'rxjs'
+import { switchMap } from 'rxjs/operators'
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('planning')
 export class PlanningController {
   constructor(
     private readonly planningService: PlanningService,
-    private readonly availabilityService: AvailabilityService
+    private readonly availabilityService: AvailabilityService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   @Post("create")
@@ -23,11 +26,22 @@ export class PlanningController {
   }
 
   @Post(":id/availability/create")
-  createAvailability(@Param('id') id: string, @Body() createAvailabilityDto: CreateAvailabilityDto) {
-    return this.availabilityService.create(id, createAvailabilityDto);
+  async createAvailability(@Param('id') id: string, @Body() createAvailabilityDto: CreateAvailabilityDto) {
+    await this.availabilityService.create(id, createAvailabilityDto);
+    this.eventEmitter.emit('availability-create')
   }
+
   @Get(":id/availability")
   findAvailability(@Param('id') id: string) {
     return this.availabilityService.findAvailabilityByPlanning(id);
+  }
+
+  @Sse(":id/sse")
+  sendAvailablities(@Param('id') id: string): Observable<MessageEvent> {
+    return fromEvent(this.eventEmitter, 'availability-create').pipe(
+      switchMap(async () => {
+        return { data: await this.availabilityService.findAvailabilityByPlanning(id)} as MessageEvent
+      })
+    )
   }
 }

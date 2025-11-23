@@ -5,7 +5,10 @@ export function readAvailableTimes(timeTable) {
     let previous = null;
 
     allTimes.forEach((day) => {
+        start = null;
+        previous = null;
         Object.values(day).forEach((hour) => {
+            
             Object.values(hour).forEach((time, i) => {
                 if (time.checked && start === null) start = time.timestampStart
                 if (!time.checked && start !== null) {
@@ -15,9 +18,8 @@ export function readAvailableTimes(timeTable) {
                 previous = time.timestampEnd
              })
         })
+        if (start != null) ranges.push({startTime: start, endTime: previous})
     });
-
-    if (start != null) ranges.push({startTime: start, endTime: previous})
 
     return ranges;
 }

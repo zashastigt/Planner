@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
-import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Availability } from './entities/availability.entity';
@@ -25,20 +24,20 @@ export class AvailabilityService {
     createAvailabilityDto.planning = planning
     let availability = await this.availabilityRepo.findOneBy({planning, name: createAvailabilityDto.name})
     
-    if(availability) this.availabilityRepo.delete({planning, name: createAvailabilityDto.name})
-    availability = await this.availabilityRepo.save(this.availabilityRepo.create(createAvailabilityDto))
-
-    for(const time of createAvailabilityDto.times){
-      this.timeService.create(availability, time)
-    }
+    if(availability) await this.availabilityRepo.delete({planning, name: createAvailabilityDto.name})
+      availability = await this.availabilityRepo.save(this.availabilityRepo.create(createAvailabilityDto))
+      
+      for(const time of createAvailabilityDto.times){
+        await this.timeService.create(availability, time)
+      }
   }
 
   findAll() {
     return this.availabilityRepo.find()
   }
 
-  findAvailabilityByPlanning(id: string){
-    return this.availabilityRepo.find({ 
+  async findAvailabilityByPlanning(id: string){
+    return await this.availabilityRepo.find({ 
       select: {
         name: true,
         times: {
