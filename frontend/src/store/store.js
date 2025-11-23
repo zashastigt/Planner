@@ -82,13 +82,13 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
     }
 
     function setJsonActive(allTimestamps, isActive) {
-        const END_TABLE_RANGE = 3
+        const jsonSizeStore = useJsonSizeStore()
         const timeStore = useTimeStore()
         
         for (const timestamp of allTimestamps) {      
             let time = dayjs.unix(timestamp)
             
-            if (time.hour() <= END_TABLE_RANGE) time = time.subtract(1, 'd');
+            if (time.hour() < jsonSizeStore.cellsBetweenHour) time = time.subtract(1, 'd');
 
             const dayKey = time.format('ddd')
             const hourKey = time.format('HH:00')
