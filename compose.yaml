@@ -8,13 +8,19 @@ services:
       - "8080:8080"
     depends_on:
      - planner-backend
+    volumes:
+      - ./.env:/usr/local/planner/.env
   planner-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
       network: host
+    ports:
+      - "3000:3000"
     depends_on:
      - planner-db
+    volumes:
+      - ./.env:/usr/local/planner-backend/.env
   planner-db:
     image: mariadb:12.0.2
     restart: always

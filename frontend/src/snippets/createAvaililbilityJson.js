@@ -40,14 +40,18 @@ export function createAvailibilityJson(startDate, endDate, cellsBetweenHour, use
     for (const user of usersAvailabilities) {
         for (const userTime of user.times) {
             let currentTime = dayjs.unix(userTime.startTime)
-            const endTime = dayjs.unix(userTime.endTime)
+            let endTime = dayjs.unix(userTime.endTime)
+            
 
             const dayKey = currentTime.format('ddd');
             while (currentTime.isBefore(endTime)) {
                 const hourKey = currentTime.format('HH:00');
                 const betweenHourKey = currentTime.format('mm') / MINUTES_BETWEEN;
 
-                const newJsonTime = resultJson[dayKey][hourKey][betweenHourKey]
+                let tempDayKey = dayKey
+                if (currentTime.hour() < cellsBetweenHour) tempDayKey = currentTime.subtract(1, 'day').format('ddd')
+                const newJsonTime = resultJson[tempDayKey][hourKey][betweenHourKey]
+
 
                 newJsonTime['userList'].push(user.name)
                 newJsonTime.checked = newJsonTime['userList'].length === usersAvailabilities.length

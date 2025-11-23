@@ -22,4 +22,4 @@ database/data
 *.njsproj
 *.sln
 *.sw?
-.env.production
+.env*

@@ -5,7 +5,6 @@ services:
       - ./frontend/package.json:/usr/local/planner/package.json
       - ./frontend/package-lock.json:/usr/local/planner/package-lock.json
       - ./frontend/index.html:/usr/local/planner/index.html
-      - ./.env.development:/usr/local/planner/.env.development
   planner-backend:
     volumes:
       - ./backend/.prettierrc:/usr/local/planner-backend/.prettierrc
