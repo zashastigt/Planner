@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import dayjs from 'dayjs';
 
 export const useTimeStore = defineStore('time', () => {
@@ -126,11 +126,14 @@ export const useAvailabilityStore = defineStore('availability', () => {
 })
 
 export const useColorStore = defineStore('color', () => {
-    const color = ref('#17aa41')
+    const color = ref(
+        localStorage.getItem("tableColor")
+        ? localStorage.getItem("tableColor")
+        : '#17aa41')
 
-    const changeColor = (newColor) => {
-        color.value = newColor
-    }
+    watch(color, () => {
+        localStorage.setItem("tableColor", color.value)
+    })
 
-    return {color, changeColor}
+    return {color}
 })
