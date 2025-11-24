@@ -12,7 +12,6 @@ defineProps({
 })
 
 const handleMouse = ref(null);
-
 const nameCheck = ref(false)
 const updateNameCheck = (newValue) => {
     nameCheck.value = newValue

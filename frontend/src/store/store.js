@@ -64,11 +64,11 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
 
     function setTimeCellAndJsonActive(timestamps) {
         const allTimestamps = []
-        
+
         timestamps.forEach(time => {
             const startTime = time.startTime
             const endTime = time.endTime
-            let currentTime = startTime         
+            let currentTime = startTime
 
             while (currentTime < endTime) {
                 timeCellIds.value.add(currentTime);
@@ -82,13 +82,13 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
     }
 
     function setJsonActive(allTimestamps, isActive) {
-        const END_TABLE_RANGE = 3
+        const jsonSizeStore = useJsonSizeStore()
         const timeStore = useTimeStore()
         
         for (const timestamp of allTimestamps) {      
             let time = dayjs.unix(timestamp)
             
-            if (time.hour() <= END_TABLE_RANGE) time = time.subtract(1, 'd');
+            if (time.hour() < jsonSizeStore.cellsBetweenHour) time = time.subtract(1, 'd');
 
             const dayKey = time.format('ddd')
             const hourKey = time.format('HH:00')
@@ -96,10 +96,9 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
 
             timeStore.editableTimeTable[dayKey][hourKey][subHourKey / (jsonSizeStore.cellBlock / jsonSizeStore.cellsBetweenHour)].checked = isActive;
         }
-        console.log(timeStore.editableTimeTable)
     }
 
-    return { timeCellIds, timeCellTempIds, timeCellTempDeleteIds, mergeTempIds, updateTempIds, setTimeCellAndJsonActive, setJsonActive }
+    return { timeCellIds, timeCellTempIds, timeCellTempDeleteIds, mergeTempIds, updateTempIds, setJsonActive, setTimeCellAndJsonActive }
 })
 
 export const useDBCallStore = defineStore('dbCall', () => {

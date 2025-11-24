@@ -18,6 +18,6 @@ export class Planning {
     })
     creationDate: number
 
-    @OneToMany(()=> Availability, (availabililty) => availabililty.planning)
+    @OneToMany(()=> Availability, (availability) => availability.planning)
     availability: Availability[]
 }

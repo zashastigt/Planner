@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePlanningDto } from './dto/create-planning.dto';
-import { UpdatePlanningDto } from './dto/update-planning.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Planning } from './entities/planning.entity';
 import { Repository } from 'typeorm';
@@ -25,10 +24,6 @@ export class PlanningService {
 
   findOne(id: string) {
     return this.planningRepo.findOneBy({ id })
-  }
-
-  update(id: string, updatePlanningDto: UpdatePlanningDto) {
-    return `This action updates a #${id} planning`;
   }
 
   remove(id: string) {

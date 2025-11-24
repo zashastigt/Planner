@@ -17,6 +17,7 @@ onBeforeMount(async () => {
     if (!planningDto) {
         planningDto = await getPlanning()
     }
+
     availabilityStore.availability = await getAvailability()
     
     const startDate = dayjs.unix(planningDto.startDate)
@@ -24,14 +25,17 @@ onBeforeMount(async () => {
 
     timeStore.setEditableJson(createJson(startDate, endDate))
     availabilityJson.value = createJson(startDate, endDate, availabilityStore.availability)
+    
+    const eventSource = new EventSource(`${import.meta.env.VITE_API_ENDPOINT}planning/${planningDto.id}/sse`);
+    eventSource.onmessage = ({data}) => {
+        availabilityJson.value = createJson(startDate, endDate, JSON.parse(data))
+    }
 })
 
 function createJson(startDate, endDate, usersAvailabilities = []) {
     const jsonSizeStore = useJsonSizeStore()
     return createAvailibilityJson(startDate, endDate, jsonSizeStore.cellsBetweenHour, usersAvailabilities)
 }
-
-
 </script>
 
 <template>

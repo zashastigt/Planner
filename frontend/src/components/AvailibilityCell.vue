@@ -1,7 +1,8 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useColorStore } from '../store/store';
-
+import dayjs from 'dayjs';
+import { ref } from 'vue';
 
 const props = defineProps([
     'hour',
@@ -14,11 +15,16 @@ const props = defineProps([
 const colorStore = useColorStore()
 const { color } = storeToRefs(colorStore)
 
+const localHour = ref(dayjs()
+    .set('hour', props.hourKey.substring(0, 2))
+    .set('minute', props.hourKey.substring(3, 5))
+    .add(Number(dayjs().format().split('+')[1].substring(0, 2)), 'hour')
+    .format('HH:mm'))
 </script>
 
 <template>
     <div class="tab">
-        <span class="hourText" v-if="index === 0">{{ hourKey }}</span>
+        <span class="hourText" v-if="index === 0">{{ localHour }}</span>
         <div class="cellBlock">
             <div
                 class="timeCell"
@@ -27,7 +33,6 @@ const { color } = storeToRefs(colorStore)
                 :key="index"
                 :style="{ backgroundColor: selected.checked ? color : 'transparent'}">
             </div>
-            
         </div>
     </div>
 </template>
