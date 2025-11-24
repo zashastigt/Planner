@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 export class WebhookService {
 
   sendWebhook(planning: Planning, availabilities: Availability[]) {
-    const maxAvailability = this.createAvailibilityJson(planning, availabilities)
+    const maxAvailability = this.getMaxAvailability(planning, availabilities)
 
     let daysText = ""
     for(const day of maxAvailability.days){
@@ -26,7 +26,7 @@ export class WebhookService {
     })
   }
 
-  createAvailibilityJson(planning: Planning, availabilities: Availability[]) {
+  getMaxAvailability(planning: Planning, availabilities: Availability[]) {
     const days: {
       day: string,
       times: {
