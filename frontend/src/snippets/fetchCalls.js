@@ -11,20 +11,52 @@ const urlId = () => {
     return planningId
 }
 
-export async function createPlanning(date) {
+export async function createPlanning(date, webhook="") {
+
+    if(webhook){
+        localStorage.setItem("webhook", webhook)
+        const messageId = (await fetch(`${webhook}?wait=true`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: "Planner",
+                content: `Creating planning...`
+            })
+        }).then(res=>res.json())).id
+        webhook = `${webhook}/messages/${messageId}`
+    }
+
     const response = await fetch(`${baseUrl}/create`, {
         method: "POST",
         headers: {
-        "Content-Type": "application/json"
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
             startDate: dayjs(date.start).unix(),
-            endDate: dayjs(date.end).unix()
+            endDate: dayjs(date.end).unix(),
+            webhook: webhook
         })
     });
+    
     const planningDto = await response.json();
     const dbCallStore = useDBCallStore()
     dbCallStore.setPlanningDto(planningDto)
+    
+    if(webhook){
+        fetch(`${webhook}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: "Planner",
+                content: `Please enter your availability [here](${import.meta.env.VITE_FRONTEND_URL}/${planningDto.id})`
+            })
+        })
+    }
+    
     router.push({ path: `/${planningDto.id}`})
 }
 

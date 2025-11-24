@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator"
+import { IsNotEmpty, IsOptional } from "class-validator"
 
 export class CreatePlanningDto {
     id: string
@@ -8,4 +8,7 @@ export class CreatePlanningDto {
 
     @IsNotEmpty()
     endDate: number
+
+    @IsOptional()
+    webhook: string
 }
