@@ -1,4 +1,6 @@
 <script setup>
+import { storeToRefs } from 'pinia';
+import { useColorStore } from '../store/store';
 import dayjs from 'dayjs';
 import { ref } from 'vue';
 
@@ -9,6 +11,10 @@ const props = defineProps([
     'index',
     'hourIndex',
 ])
+
+const colorStore = useColorStore()
+const { color } = storeToRefs(colorStore)
+
 const localHour = ref(dayjs()
     .set('hour', props.hourKey.substring(0, 2))
     .set('minute', props.hourKey.substring(3, 5))
@@ -25,7 +31,7 @@ const localHour = ref(dayjs()
                 v-for="(selected, index) in hour"
                 @click="() => console.log(selected.userList)"
                 :key="index"
-                :style="{ backgroundColor: selected.checked ? '#17aa41' : 'transparent'}">
+                :style="{ backgroundColor: selected.checked ? color : 'transparent'}">
             </div>
         </div>
     </div>

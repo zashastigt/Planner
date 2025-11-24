@@ -4,6 +4,8 @@ import InputName from '../components/InputName.vue';
 import TimeSelect from '../components/timeSelect/TimeSelect.vue';
 import { ref } from "vue";
 import ShowAvailibility from '../components/timeSelect/ShowAvailibility.vue';
+import ColorPicker from '../components/ColorPicker.vue';
+import PlannerMenu from '../components/PlannerMenu.vue';
 
 defineProps({
     planningId: Number
@@ -20,6 +22,7 @@ const updateNameCheck = (newValue) => {
     <div id="container" 
     @mouseup="() => handleMouse?.handleMouseGone()"
     @mouseleave="() => handleMouse?.handleMouseGone()">
+        <PlannerMenu />
         <Card v-if="!nameCheck" title="Input your name">
             <InputName nameCheck="nameCheck" @updateNameCheck="updateNameCheck" />
         </Card>
