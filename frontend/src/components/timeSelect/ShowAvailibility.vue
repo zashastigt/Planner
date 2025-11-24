@@ -36,7 +36,6 @@ function createJson(startDate, endDate, usersAvailabilities = []) {
     const jsonSizeStore = useJsonSizeStore()
     return createAvailibilityJson(startDate, endDate, jsonSizeStore.cellsBetweenHour, usersAvailabilities)
 }
-
 </script>
 
 <template>

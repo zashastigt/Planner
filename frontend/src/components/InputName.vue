@@ -26,12 +26,18 @@ function getTable() {
     }    
 }
 
+function handleKeyUp(event) {
+    if (event.key === 'Enter') {
+        getTable()
+    }
+}
+
 </script>
 
 <template>
     <div class="inputName">
-        <input type="text" v-model="name"></input>
-        <button @click="getTable()">
+        <input type="text" v-model="name" @keyup="handleKeyUp"></input>
+        <button @click="getTable" >
             <img src="../assets/loginWhite.png" />
         </button>
     </div>
