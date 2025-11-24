@@ -1,5 +1,7 @@
 <script setup>
+import { ref } from 'vue';
 import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
+import dayjs from 'dayjs';
 
 const props = defineProps([
     'hour',
@@ -14,11 +16,16 @@ const props = defineProps([
 const timeCellIdsStore = useTimeCellIdsStore()
 const timeStore = useTimeStore()
 
+const localHour = ref(dayjs()
+    .set('hour', props.hourKey.substring(0, 2))
+    .set('minute', props.hourKey.substring(3, 5))
+    .add(Number(dayjs().format().split('+')[1].substring(0, 2)), 'hour')
+    .format('HH:mm'))
 </script>
 
 <template>
     <div class="tab">
-        <span class="hourText" v-if="index === 0">{{ hourKey }}</span>
+        <span class="hourText" v-if="index === 0">{{ localHour }}</span>
         <div class="cellBlock">
             <div
                 class="timeCell"
