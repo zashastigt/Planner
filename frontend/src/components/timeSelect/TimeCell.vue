@@ -2,7 +2,6 @@
 import { storeToRefs } from 'pinia';
 import { useTimeStore, useTimeCellIdsStore, useColorStore } from '../../store/store';
 import { ref } from 'vue';
-import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
 import dayjs from 'dayjs';
 
 const props = defineProps([
