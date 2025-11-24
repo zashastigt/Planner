@@ -1,5 +1,6 @@
 <script setup>
-import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
+import { storeToRefs } from 'pinia';
+import { useTimeStore, useTimeCellIdsStore, useColorStore } from '../../store/store';
 
 const props = defineProps([
     'hour',
@@ -13,6 +14,9 @@ const props = defineProps([
 // Stores
 const timeCellIdsStore = useTimeCellIdsStore()
 const timeStore = useTimeStore()
+
+const colorStore = useColorStore()
+const { color } = storeToRefs(colorStore)
 
 </script>
 
@@ -28,7 +32,7 @@ const timeStore = useTimeStore()
                 :style="{ backgroundColor: 
                     timeCellIdsStore.timeCellIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) || 
                     timeCellIdsStore.timeCellTempIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) ? 
-                    '#17aa41' : 'transparent'}">
+                    color : 'transparent'}">
             </div>
             
         </div>

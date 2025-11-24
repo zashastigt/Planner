@@ -1,4 +1,7 @@
 <script setup>
+import { storeToRefs } from 'pinia';
+import { useColorStore } from '../store/store';
+
 
 const props = defineProps([
     'hour',
@@ -7,6 +10,9 @@ const props = defineProps([
     'index',
     'hourIndex',
 ])
+
+const colorStore = useColorStore()
+const { color } = storeToRefs(colorStore)
 
 </script>
 
@@ -19,7 +25,7 @@ const props = defineProps([
                 v-for="(selected, index) in hour"
                 @click="() => console.log(selected.userList)"
                 :key="index"
-                :style="{ backgroundColor: selected.checked ? '#17aa41' : 'transparent'}">
+                :style="{ backgroundColor: selected.checked ? color : 'transparent'}">
             </div>
             
         </div>

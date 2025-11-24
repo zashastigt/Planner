@@ -4,6 +4,7 @@ import './style.css'
 import App from './App.vue'
 import { router } from './router'
 import 'v-calendar/style.css';
+import 'vue-color/style.css';
 
 const pinia = createPinia()
 const app = createApp(App)

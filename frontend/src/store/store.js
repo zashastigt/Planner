@@ -124,3 +124,13 @@ export const useAvailabilityStore = defineStore('availability', () => {
 
     return {availability}
 })
+
+export const useColorStore = defineStore('color', () => {
+    const color = ref('#17aa41')
+
+    const changeColor = (newColor) => {
+        color.value = newColor
+    }
+
+    return {color, changeColor}
+})

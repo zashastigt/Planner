@@ -1,13 +1,14 @@
 <script setup>
 import { ChromePicker } from 'vue-color'
+import { useColorStore } from '../store/store'
+import { storeToRefs } from 'pinia'
 
-const color = defineModel({
-    default: '#17aa41'
-})
+const colorStore = useColorStore()
+const { color } = storeToRefs(colorStore)
+
 </script>
 
 <template>
-    {{ color }}
     <ChromePicker v-model="color" />
 </template>
 
