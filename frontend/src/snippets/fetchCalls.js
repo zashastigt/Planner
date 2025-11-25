@@ -39,7 +39,7 @@ export async function createPlanning(date, webhook="") {
             webhook: webhook
         })
     });
-    
+
     const planningDto = await response.json();
     const dbCallStore = useDBCallStore()
     dbCallStore.setPlanningDto(planningDto)

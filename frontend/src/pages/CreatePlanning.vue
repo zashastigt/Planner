@@ -48,7 +48,7 @@ const webhookUrl = ref(localStorage.getItem("webhook"))
                 v-model="webhookUrl">
             </input>
         </fieldset>
-        <button class="createButton" @click="createPlanning(date, webhookUrl)">create planning</button>
+        <button class="createButton" @click="createPlanning(date, useWebhook ? webhookUrl : '')">create planning</button>
     </div>
 </template>
 
