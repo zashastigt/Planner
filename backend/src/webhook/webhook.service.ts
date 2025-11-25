@@ -58,8 +58,9 @@ export class WebhookService {
       
         let smallestEndTime = Number.POSITIVE_INFINITY
         const matchingBlocks = currentDayTimes.filter((block)=>{
-          smallestEndTime = Math.min(smallestEndTime, block.endTime)
-          return startTime >= block.startTime && startTime < block.endTime
+          const blockMatches = startTime >= block.startTime && startTime < block.endTime 
+          if(blockMatches) smallestEndTime = Math.min(smallestEndTime, block.endTime)
+          return blockMatches
         })
       
         if(matchingBlocks.length < userAmount) continue;
