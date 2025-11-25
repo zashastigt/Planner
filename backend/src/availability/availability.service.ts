@@ -51,4 +51,5 @@ export class AvailabilityService {
       relations: ['times']
     })
   }
+
 }

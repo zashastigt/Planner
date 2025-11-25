@@ -7,10 +7,11 @@ import { Availability } from 'src/availability/entities/availability.entity';
 import { AvailabilityService } from 'src/availability/availability.service';
 import { Time } from 'src/time/entities/time.entity';
 import { TimeService } from 'src/time/time.service';
+import { WebhookService } from 'src/webhook/webhook.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Planning, Availability, Time])],
   controllers: [PlanningController],
-  providers: [PlanningService, AvailabilityService, TimeService],
+  providers: [PlanningService, AvailabilityService, TimeService, WebhookService],
 })
 export class PlanningModule {}

@@ -13,6 +13,11 @@ export class Planning {
     endDate: number
 
     @Column({
+        nullable: true
+    })
+    webhook: string
+
+    @Column({
         type: "timestamp", 
         default: () => "CURRENT_TIMESTAMP"
     })
