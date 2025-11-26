@@ -59,7 +59,7 @@ function handleKeyUp(event) {
     }
 
     .inputName input:hover {
-        background-color: rgba(255, 255, 255, 0.15);
+        background-color: var(--small-lightening);
     }
 
     .inputName input:focus {
@@ -70,15 +70,15 @@ function handleKeyUp(event) {
         height: 30px;
         border: none;
         width: 30px;
-        background-color: rgb(110, 110, 110);
+        background-color: var(--medium-gray);
     }
 
     .inputName button:hover {
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: var(--medium-lightening);
     }
 
     .inputName button:active {
-        background-color: rgb(81, 81, 81);
+        background-color: var(--dark-gray);
     }
 
     .inputName button img {

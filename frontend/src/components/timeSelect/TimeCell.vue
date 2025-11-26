@@ -64,15 +64,15 @@ const localHour = ref(dayjs()
 }
 
 .timeCell:nth-child(3) {
-    border-top: white dashed 1px;
+    border-top: var(--table-border-color) dashed 1px;
 }
 
 .timeCell:nth-child(4) {
-    border-bottom: white solid 1px;
+    border-bottom: var(--table-border-color) solid 1px;
 }
 
 .timeCell:hover {
-    background-color: #17aa4155 !important;
+    background-color: v-bind(color) !important;
 }
 
 .hourText {

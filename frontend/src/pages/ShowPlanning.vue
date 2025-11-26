@@ -5,7 +5,6 @@ import TimeSelect from '../components/timeSelect/TimeSelect.vue';
 import { ref } from "vue";
 import ShowAvailibility from '../components/timeSelect/ShowAvailibility.vue';
 import ColorPicker from '../components/ColorPicker.vue';
-import PlannerMenu from '../components/PlannerMenu.vue';
 
 defineProps({
     planningId: Number
@@ -22,16 +21,21 @@ const updateNameCheck = (newValue) => {
     <div id="container" 
     @mouseup="() => handleMouse?.handleMouseGone()"
     @mouseleave="() => handleMouse?.handleMouseGone()">
-        <PlannerMenu />
-        <Card v-if="!nameCheck" title="Input your name">
-            <InputName nameCheck="nameCheck" @updateNameCheck="updateNameCheck" />
-        </Card>
-        <Card v-if="nameCheck" title="Your Availibility">
-            <TimeSelect ref="handleMouse" />
-        </Card>
-        <Card title="Group Availibility">
-            <ShowAvailibility />
-        </Card>
+        <div class="left side">
+            <Card v-if="!nameCheck" title="Input your name">
+                <InputName nameCheck="nameCheck" @updateNameCheck="updateNameCheck" />
+            </Card>
+            <Card v-if="nameCheck" title="Your Availibility">
+                <TimeSelect ref="handleMouse" />
+            </Card>
+        </div>
+        <div class="right side">
+            <Card title="Group Availibility">
+                <ShowAvailibility />
+            </Card>
+            <ColorPicker />
+        </div>
+        
     </div>
     
 </template>
@@ -40,8 +44,23 @@ const updateNameCheck = (newValue) => {
     #container {
         display: flex;
         width: 100vw;
-        min-height: 100vh;
+        height: 100vh;
         justify-content: center;
-        align-items: center;
+    }
+
+    .side {
+        display: flex;
+        align-items: flex-start;
+        width: 50%;
+        padding: 0 30px;
+        padding-top: 15%;
+    }
+
+    .left {
+        justify-content: flex-end;
+    }
+
+    .right {
+        justify-content: flex-start;
     }
 </style>

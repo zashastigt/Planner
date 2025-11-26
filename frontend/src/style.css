@@ -1,11 +1,22 @@
 :root {
+  --bg-color: #151515;
+  --black: black;
+  --dark-gray: rgb(38, 38, 38);
+  --dark-medium-gray: #3b3b3b;
+  --medium-gray: rgb(110, 110, 110);
+  --light-gray: rgb(195, 195, 195);
+  --table-border-color: aliceblue;
+
+  --small-lightening:rgba(255, 255, 255, 0.15);
+  --medium-lightening:rgba(255, 255, 255, 0.5);
+
   font-family: 'Courier New', Courier, monospace, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #151515;
+  background-color: var(--bg-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
