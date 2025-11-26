@@ -14,11 +14,11 @@ export const useTimeStore = defineStore('time', () => {
     function setAvailabilityJson(json) {
         availabilityTimeTable.value = json
     }
-    
+
     const timeTableColumnLength = computed(() => {
         if (!editableTimeTable) return;
-        
-        const days = Object.values(editableTimeTable.value);      
+
+        const days = Object.values(editableTimeTable.value);
         let length = Object.values(days[1])[0][0].timestampStart - Object.values(days[0])[0][0].timestampStart
 
         return length;
@@ -27,39 +27,56 @@ export const useTimeStore = defineStore('time', () => {
     return { name, editableTimeTable, timeTableColumnLength, availabilityTimeTable, setEditableJson, setAvailabilityJson }
 })
 
-export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
-    const timeCellIds = ref(new Set([]));
-    const timeCellTempIds = ref(new Set([]));
-    const timeCellTempDeleteIds = ref(new Set([]));
+export const useCellsStore = defineStore('cells', () => {
+    const cells = ref(new Set([]));
+    const tempCells = ref(new Set([]));
+    const deleteCells = ref(new Set([]));
     const jsonSizeStore = useJsonSizeStore()
-    const SECONDS_BETWEEN_CELLS = jsonSizeStore.cellBlock * jsonSizeStore.cellBlock / jsonSizeStore.cellsBetweenHour; //15 mintues in seconds
 
-    function mergeTempIds() {
-        timeCellTempIds.value.forEach(value => timeCellIds.value.add(value));
+    function mergeTempCells() {
+        tempCells.value.forEach(value => cells.value.add(value));
     }
 
-    function updateTempIds(startId, endId) {
-        startId = Number(startId);
-        endId = Number(endId);
+    function addTempCells(startCell, endCell) {
+        startCell = Number(startCell);
+        endCell = Number(endCell);
 
-        timeCellTempIds.value.clear()
+        if (!startCell || !endCell) return; //Return if cell border gets hit
 
-        const step = startId <= endId ? SECONDS_BETWEEN_CELLS : -SECONDS_BETWEEN_CELLS;
+        const distance = Math.abs(startCell - endCell);
+        let heightDistance = distance % jsonSizeStore.cellColumn;
 
-        for (let i = startId; (step >= 0 && i <= endId) || (step <= 0 && i >= endId); i += step) {
-            if (timeCellIds.value.has(i) && (timeCellIds.value.has(startId) || timeCellTempDeleteIds.value.has(startId))) {
-                timeCellIds.value.delete(i);
-                timeCellTempDeleteIds.value.add(i);
-            }
-            else {
-                if (!timeCellTempDeleteIds.value.has(startId)) timeCellTempIds.value.add(i);
-            }
-            
-            if (timeCellIds.value.has(i) && timeCellTempIds.value.has(i)) {
-                timeCellIds.value.delete(i);
-                timeCellTempIds.value.add(i);
+        if (heightDistance > jsonSizeStore.cellColumn / 2) heightDistance -= jsonSizeStore.cellColumn;
+        let heightDifference = heightDistance / jsonSizeStore.cell
+
+        const columnDistance = distance - heightDistance;
+        let columnDifference = columnDistance / jsonSizeStore.cellColumn;
+
+        let columnStep = 1;
+        if (startCell > endCell) {
+            columnStep = -1;
+            columnDifference *= -1;
+            heightDifference *= -1;
+        }
+
+        const cellStep = heightDifference > 0 ? 1 : -1;
+
+        tempCells.value.clear();
+        for (let column = 0; (column >= 0 && column <= columnDifference) || (column <= 0 && column >= columnDifference); column += columnStep) {
+            for (let cell = 0; (cell >= 0 && cell <= heightDifference) || (cell <= 0 && cell >= heightDifference); cell += cellStep) {
+                const combined = startCell + column * jsonSizeStore.cellColumn + cell * jsonSizeStore.cell;
+
+                tempCells.value.add(combined)
+
+                if (cells.value.has(combined) && tempCells.value.has(combined)) {//Hovered over cells become tempCells
+                    cells.value.delete(combined)
+                }
             }
         }
+
+
+
+
     }
 
     function setTimeCellAndJsonActive(timestamps) {
@@ -71,7 +88,7 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
             let currentTime = startTime
 
             while (currentTime < endTime) {
-                timeCellIds.value.add(currentTime);
+                cells.value.add(currentTime);
                 allTimestamps.push(currentTime)
 
                 currentTime += SECONDS_BETWEEN_CELLS;
@@ -84,10 +101,10 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
     function setJsonActive(allTimestamps, isActive) {
         const jsonSizeStore = useJsonSizeStore()
         const timeStore = useTimeStore()
-        
-        for (const timestamp of allTimestamps) {      
+
+        for (const timestamp of allTimestamps) {
             let time = dayjs.unix(timestamp)
-            
+
             if (time.hour() < jsonSizeStore.cellsBetweenHour) time = time.subtract(1, 'd');
 
             const dayKey = time.format('ddd')
@@ -98,7 +115,7 @@ export const useTimeCellIdsStore = defineStore('timeCellIds', () => {
         }
     }
 
-    return { timeCellIds, timeCellTempIds, timeCellTempDeleteIds, mergeTempIds, updateTempIds, setJsonActive, setTimeCellAndJsonActive }
+    return { cells, tempCells, deleteCells, mergeTempCells, addTempCells, setJsonActive, setTimeCellAndJsonActive }
 })
 
 export const useDBCallStore = defineStore('dbCall', () => {
@@ -108,31 +125,33 @@ export const useDBCallStore = defineStore('dbCall', () => {
         storedPlanningDto.value = planningDto
     }
 
-    return {storedPlanningDto, setPlanningDto}
+    return { storedPlanningDto, setPlanningDto }
 })
 
 export const useJsonSizeStore = defineStore('jsonSize', () => {
     const cellsBetweenHour = 4 // 4 x 15 minutes
     const cellBlock = 60 // hour
+    const cellColumn = 86400 //24 hour
+    const cell = 900 //15 minutes
 
-    return {cellsBetweenHour, cellBlock}
+    return { cellsBetweenHour, cellBlock, cellColumn, cell }
 })
 
 export const useAvailabilityStore = defineStore('availability', () => {
     const availability = ref([])
 
-    return {availability}
+    return { availability }
 })
 
 export const useColorStore = defineStore('color', () => {
     const color = ref(
         localStorage.getItem("tableColor")
-        ? localStorage.getItem("tableColor")
-        : '#17aa41')
+            ? localStorage.getItem("tableColor")
+            : '#17aa41')
 
     watch(color, () => {
         localStorage.setItem("tableColor", color.value)
     })
 
-    return {color}
+    return { color }
 })

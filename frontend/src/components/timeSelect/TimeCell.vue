@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia';
-import { useTimeStore, useTimeCellIdsStore, useColorStore } from '../../store/store';
+import { useTimeStore, useCellsStore, useColorStore } from '../../store/store';
 import { ref } from 'vue';
 import dayjs from 'dayjs';
 
@@ -14,7 +14,7 @@ const props = defineProps([
 ])
 
 // Stores
-const timeCellIdsStore = useTimeCellIdsStore()
+const cellsStore = useCellsStore()
 const timeStore = useTimeStore()
 
 const colorStore = useColorStore()
@@ -37,8 +37,8 @@ const localHour = ref(dayjs()
                 :id="timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart"
                 :key="index"
                 :style="{ backgroundColor: 
-                    timeCellIdsStore.timeCellIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) || 
-                    timeCellIdsStore.timeCellTempIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) ? 
+                    cellsStore.cells.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) || 
+                    cellsStore.tempCells.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) ? 
                     color : 'transparent'}">
             </div>
             

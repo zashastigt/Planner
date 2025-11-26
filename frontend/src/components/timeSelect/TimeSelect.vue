@@ -1,6 +1,6 @@
 <script setup>
 import TimeCell from './TimeCell.vue';
-import { useTimeStore, useTimeCellIdsStore } from '../../store/store';
+import { useTimeStore, useCellsStore } from '../../store/store';
 import { storeToRefs } from 'pinia';
 import { useMouseHold } from '../../snippets/mouse';
 import { sendAvailability } from '../../snippets/fetchCalls.js';
@@ -8,64 +8,39 @@ import { ref } from "vue";
 
 // Stores
 const timeStore = useTimeStore()
-const timeCellIdsStore = useTimeCellIdsStore()
+const cellsStore = useCellsStore()
 const { editableTimeTable } = storeToRefs(timeStore)
 
 // States
 const isMouseDown = useMouseHold()
-const startColumnIndex = ref(-1)
-const startTimeCellId = ref(-1)
-const previousLastTimeCellId = ref(-1)
+const startCell = ref(-1)
 const isHoldingDown = ref(false)
 
-function handleMouseDown(firstTimeCell, columnIndex) {
-    startColumnIndex.value = columnIndex;
-    
-    if (!firstTimeCell.target.classList.contains("timeCell")) {
-        startTimeCellId.value = -1
-    }
-    else {
-        startTimeCellId.value = Number(firstTimeCell.target.id)
-    }
+function handleMouseDown(cell) {
+    startCell.value = cell.target.id
 
-    previousLastTimeCellId.value = startTimeCellId.value
     isHoldingDown.value = true;
-    timeCellIdsStore.updateTempIds(startTimeCellId.value, startTimeCellId.value)
+
+    cellsStore.addTempCells(startCell.value, startCell.value)
 }
 
-function handleMouseOver(lastTimeCell, columnIndex) {
-    if (!isHoldingDown.value || !lastTimeCell.target.classList.contains("timeCell")) return;
+function handleMouseOver(cell) {
+    if (!isHoldingDown.value) return;
 
-    let lastTimeCellId = Number(lastTimeCell.target.id)
-
-    if (!lastTimeCellId && lastTimeCellId != 0) {
-        lastTimeCellId = previousLastTimeCellId.value
-    }
-   
-    // Cross column selection
-    if (startColumnIndex.value !== columnIndex && lastTimeCellId != previousLastTimeCellId.value) {
-        lastTimeCellId = lastTimeCellId - timeStore.timeTableColumnLength * -(startColumnIndex.value - columnIndex)
-    }
-
-    if (startTimeCellId.value == -1 && lastTimeCellId != -1) {
-        startTimeCellId.value = lastTimeCellId
-    }
-    
-    previousLastTimeCellId.value = lastTimeCellId
-    timeCellIdsStore.updateTempIds(startTimeCellId.value, lastTimeCellId)    
+    cellsStore.addTempCells(startCell.value, cell.target.id)
 }
 
 function handleMouseGone() {
-    if (startTimeCellId.value == -1 || !isHoldingDown.value) return;
+    if (startCell.value == -1 || !isHoldingDown.value) return;
     
     isHoldingDown.value = false;
-    timeCellIdsStore.mergeTempIds()
+    cellsStore.mergeTempCells()
 
-    timeCellIdsStore.setJsonActive(timeCellIdsStore.timeCellTempDeleteIds, false)
-    timeCellIdsStore.setJsonActive(timeCellIdsStore.timeCellIds, true)
-    timeCellIdsStore.timeCellTempDeleteIds.clear()
+    // cellsStore.setJsonActive(cellsStore.deleteCells, false)
+    // cellsStore.setJsonActive(cellsStore.cells, true)
+    // cellsStore.deleteCells.clear()
 
-    sendAvailability(timeStore.name, editableTimeTable)
+    //sendAvailability(timeStore.name, editableTimeTable)
 }
 
 defineExpose({
@@ -77,8 +52,8 @@ defineExpose({
 <template>
     <div class="timeTable">
         <div class="timeColumn" v-for="(day, dayKey, index) in editableTimeTable"
-            @mousedown="(e) => handleMouseDown(e, index)"
-            @mouseover="(e) => handleMouseOver(e, index)">
+            @mousedown="(e) => handleMouseDown(e)"
+            @mouseover="(e) => handleMouseOver(e)">
             <span class="day">{{ dayKey }}</span>
             <TimeCell
                 v-for="(hour, hourKey, hourIndex) in day"
