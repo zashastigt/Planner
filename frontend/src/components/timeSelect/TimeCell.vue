@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useTimeStore, useTimeCellIdsStore, useColorStore } from '../../store/store';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import dayjs from 'dayjs';
 
 const props = defineProps([
@@ -19,6 +19,7 @@ const timeStore = useTimeStore()
 
 const colorStore = useColorStore()
 const { color } = storeToRefs(colorStore)
+const hoverColor = computed(() => (props.isMouseDown ? 'transparent' : color.value + '88'))
 
 const localHour = ref(dayjs()
     .set('hour', props.hourKey.substring(0, 2))
@@ -72,7 +73,7 @@ const localHour = ref(dayjs()
 }
 
 .timeCell:hover {
-    background-color: v-bind(color) !important;
+    background-color: v-bind(hoverColor) !important;
 }
 
 .hourText {
