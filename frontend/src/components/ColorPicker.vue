@@ -25,7 +25,7 @@ const arrowRotation = computed(() => (showPicker.value ? '0deg' : '180deg'));
 
 <style scoped>
     .colorMenu {
-        margin-top: 26px;
+        margin-top: 25px;
         background-color: var(--dark-gray);
         color: var(--black);
         border: 1px solid var(--light-gray);
