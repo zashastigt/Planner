@@ -16,16 +16,17 @@ const props = defineProps([
 
 <style scoped>
     #card {
-        margin: 0 50px;
-        background-color: rgb(38, 38, 38);
-        color: #000;
-        border: 1px solid rgb(195, 195, 195);
+        width: fit-content;
+        background-color: var(--dark-gray);
+        color: var(--black);
+        border: 1px solid var(--light-gray);
         border-radius: 20px 20px 0 20px;
+        overflow: hidden;
     }
 
     .header {
-        height: 20px;
+        height: 25px;
         border-radius: 20px 20px 0 0 ;
-        background-color: rgb(195, 195, 195);
+        background-color: var(--light-gray);
     }
 </style>
