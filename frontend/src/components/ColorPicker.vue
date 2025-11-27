@@ -8,7 +8,6 @@ const colorStore = useColorStore()
 const { color } = storeToRefs(colorStore)
 
 const showPicker = ref(false)
-const arrowRotation = computed(() => (showPicker.value ? '0deg' : '180deg'));
 </script>
 
 <template>
