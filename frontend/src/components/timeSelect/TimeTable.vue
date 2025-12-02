@@ -34,7 +34,8 @@
 
     let lastDay = ""
     const days = _.reduce(cells.value, (carry, cell)=>{
-        const currentDay = dayjs.unix(cell.startTime).format("ddd") 
+        const startTime = dayjs.unix(cell.startTime)
+        const currentDay = `<span>${startTime.format("DD")}</span><span>${startTime.format("ddd")}</span>` 
         if(currentDay === lastDay) return carry
 
         lastDay = currentDay
@@ -85,7 +86,7 @@
         grid-template-rows: repeat(${hours.length * 4}, 1fr)
     `">
         <header class="days" :style="`grid-column: 2/${days.length+2}`">
-            <div v-for="day in days" class="day">{{day}}</div>
+            <div v-for="day in days" class="day" :innerHTML="day"></div>
         </header>
         <aside class="hours" :style="`grid-row: 2/${hours.length*4+2}`">
             <div v-for="hour in hours" class="hour">{{ hour }}</div>
@@ -111,7 +112,10 @@
             display: grid;
             grid-template-columns: subgrid;
             .day{
+                display: grid;
                 border-bottom: 1px solid white;
+                line-height: 1;
+                gap: 5px;
             }
         }
         .hours{
