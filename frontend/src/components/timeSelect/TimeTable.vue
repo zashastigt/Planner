@@ -20,8 +20,8 @@
     const hours = []
     while(currentDate.diff(endDate) < 0){
         
-        const hour = currentDate.format("HH:mm")
-        if(!hours.includes(hour) && hour.endsWith(":00")) hours.push(hour)
+        const hour = currentDate.format("HH:00")
+        if(!hours.includes(hour)) hours.push(hour)
 
         const newDate = currentDate.add(props.timeInterval, "minute")
         cells.value[currentDate.unix()] = {
