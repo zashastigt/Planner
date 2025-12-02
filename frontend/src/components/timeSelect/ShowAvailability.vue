@@ -1,8 +1,8 @@
 <script setup>
 import { onBeforeMount, ref } from 'vue';
 import { getAvailability, getPlanning } from '../../snippets/fetchCalls';
-import { createAvailibilityJson } from '../../snippets/createAvaililbilityJson';
-import AvailibilityCell from '../AvailibilityCell.vue';
+import { createAvailabilityJson } from '../../snippets/createAvailabilityJson';
+import AvailabilityCell from '../AvailabilityCell.vue';
 import { useDBCallStore, useJsonSizeStore, useTimeStore, useAvailabilityStore } from '../../store/store';
 import dayjs from 'dayjs';
 
@@ -34,7 +34,7 @@ onBeforeMount(async () => {
 
 function createJson(startDate, endDate, usersAvailabilities = []) {
     const jsonSizeStore = useJsonSizeStore()
-    return createAvailibilityJson(startDate, endDate, jsonSizeStore.cellsBetweenHour, usersAvailabilities)
+    return createAvailabilityJson(startDate, endDate, jsonSizeStore.cellsBetweenHour, usersAvailabilities)
 }
 </script>
 
@@ -42,13 +42,10 @@ function createJson(startDate, endDate, usersAvailabilities = []) {
     <div class="timeTable">
         <div class="timeColumn" v-for="(day, dayKey, index) in availabilityJson">
             <span class="day">{{ dayKey }}</span>
-            <AvailibilityCell
+            <AvailabilityCell
                 v-for="(hour, hourKey, hourIndex) in day"
-                :hour="hour"
-                :hourKey="hourKey"
-                :dayKey="dayKey"
-                :index="index"
-                :hourIndex="hourIndex"/>
+                :timestamp={}
+                />
         </div>
     </div>
 </template>

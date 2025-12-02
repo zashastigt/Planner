@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-export function createAvailibilityJson(startDate, endDate, cellsBetweenHour, usersAvailabilities) {
+export function createAvailabilityJson(startDate, endDate, cellsBetweenHour, usersAvailabilities) {
     const resultJson = {}
     const TIME_START = 15 //15:00
     const TIME_END = 27 //3:00 next day, 24 hours + 3 hours

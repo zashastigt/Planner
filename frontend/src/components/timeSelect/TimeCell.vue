@@ -1,82 +1,43 @@
 <script setup>
-import { storeToRefs } from 'pinia';
-import { useTimeStore, useCellsStore, useColorStore } from '../../store/store';
-import { ref } from 'vue';
-import dayjs from 'dayjs';
+    import dayjs from 'dayjs'
 
-const props = defineProps([
-    'hour',
-    'hourKey',
-    'dayKey',
-    'index',
-    'hourIndex',
-    'isMouseDown'
-])
+    const props = defineProps([
+        "startTime",
+        "endTime",
+        "selected",
+        "onMouseUp",
+        "onMouseDown",
+        "onMouseOver"
+    ])
 
-// Stores
-const cellsStore = useCellsStore()
-const timeStore = useTimeStore()
-
-const colorStore = useColorStore()
-const { color } = storeToRefs(colorStore)
-
-const localHour = ref(dayjs()
-    .set('hour', props.hourKey.substring(0, 2))
-    .set('minute', props.hourKey.substring(3, 5))
-    .add(Number(dayjs().format().split('+')[1].substring(0, 2)), 'hour')
-    .format('HH:mm'))
 </script>
-
 <template>
-    <div class="tab">
-        <span class="hourText" v-if="index === 0">{{ localHour }}</span>
-        <div class="cellBlock">
-            <div
-                class="timeCell"
-                v-for="(selected, index) in hour"
-                :id="timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart"
-                :key="index"
-                :style="{ backgroundColor: 
-                    cellsStore.cells.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) || 
-                    cellsStore.tempCells.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) ? 
-                    color : 'transparent'}">
-            </div>
-            
-        </div>
+    <div 
+        :class="`timeCell ${props.selected ? 'selected' : ''}`"
+        @[onMouseDown?"mousedown":null] ="onMouseDown({startTime, endTime, selected})"
+        @[onMouseOver?"mouseover":null] ="onMouseOver({startTime, endTime, selected})"
+        @[onMouseUp?"mouseup":null]     ="onMouseUp({startTime, endTime, selected})"
+    >
+        <!-- {{ dayjs.unix(startTime).hour()*100+dayjs.unix(startTime).minute() }} -->
     </div>
 </template>
-
 <style scoped>
-.tab {
-    display: flex;
-    justify-content: end;
-    align-items: flex-start;
-}
-
-.cellBlock {
-    border: white solid 1px;
-    border-bottom: none;
-}
-
-.timeCell {
-    height: 8px;
-    width: 40px;
-}
-
-.timeCell:nth-child(3) {
-    border-top: white dashed 1px;
-}
-
-.timeCell:nth-child(4) {
-    border-bottom: white solid 1px;
-}
-
-.timeCell:hover {
-    background-color: #17aa4155 !important;
-}
-
-.hourText {
-    margin-top: -11px;
-    margin-right: 5px;
-}
+    .timeCell{
+        width: 40px;
+        height: 8px;
+        border-right: 1px solid white;
+        font-size: 40%;
+        &:nth-child(4n+2){
+            border-bottom: 1px solid white;
+        }
+        &:nth-child(4n+1){
+            border-top: 1px dotted white;
+        }
+        &.selected{
+            background-color: green;
+        }
+        &:hover{
+            background-color: green;
+        }
+    }
 </style>
