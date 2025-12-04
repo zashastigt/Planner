@@ -18,8 +18,6 @@
         @[onMouseOver?"mouseover":null] ="onMouseOver({startTime, endTime, selected})"
         @[onMouseUp?"mouseup":null]     ="onMouseUp({startTime, endTime, selected})"
     >
-        <!-- {{ dayjs.unix(startTime).hour()*100+dayjs.unix(startTime).minute() }} -->
-        {{ startTime }}
     </div>
 </template>
 <style scoped>
@@ -38,7 +36,7 @@
             background-color: green;
         }
         &:hover{
-            background-color: green;
+            background-color: rgba(0, 128, 0, 0.629);
         }
     }
 </style>

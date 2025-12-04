@@ -2,7 +2,7 @@
     import dayjs from 'dayjs'
     import minmax from 'dayjs/plugin/minMax'
     import dayjsTimePlugin from '../../snippets/dayjsTimePlugin'
-    import _ from 'underscore'
+    import _, { first } from 'lodash'
     import TimeCell from './TimeCell.vue'
     import {ref} from 'vue'
 
@@ -17,9 +17,7 @@
         "onEdited"
     ])
 
-    console.log(dayjs.unix(props.startDate))
     const startDate = dayjs.unix(props.startDate).time(0)
-    console.log(dayjs.unix(props.endDate))
     const endDate   = dayjs.unix(props.endDate).time(0)
     const cells = ref({})
 
@@ -54,18 +52,17 @@
 
     let firstCell = null
     function onMouseDown(cell){
-        console.log("down")
         cells.value[cell.startTime].selected = !cell.selected
         firstCell = cells.value[cell.startTime]
+        this.onMouseOver(firstCell)
     }
     
+    let temporaryCells = ref({})
     function onMouseOver(currentCell){
         if(!firstCell) return;
 
-        // firstCell.startTime = 1765347300
-        // currentCell.startTime = 1765727100
+        temporaryCells.value = _.cloneDeep(cells.value)
 
-        // if(currentCell.startTime == 1766041200) debugger;
         const selectionSmallestTime = dayjs.min(dayjs.unix(firstCell.startTime).time(), dayjs.unix(currentCell.startTime).time())
         const selectionLargestTime = dayjs.max(dayjs.unix(firstCell.startTime).time(), dayjs.unix(currentCell.startTime).time())
         
@@ -75,40 +72,45 @@
         const selectionStartDate = selectionSmallestDate.time(selectionSmallestTime) 
         const selectionEndDate = selectionLargestDate.time(selectionLargestTime)
         
-        _.each(cells.value, (cell)=>{
+        _.each(temporaryCells.value, (cell)=>{
             const startTime = dayjs.unix(cell.startTime)
-            // const endTime = dayjs.unix(cell.endTime)
-            // if(cell.startTime == 1765683900) debugger;
+
             const isBeforeSelection = startTime.isBefore(selectionStartDate) || startTime.time().isBefore(selectionStartDate.time())
             const isAfterSelection = startTime.isAfter(selectionEndDate) || startTime.time().isAfter(selectionEndDate.time())
-            // const timeIsBeforeSelection = (startTime.hour()*100+startTime.minute() < firstCellStartTime.hour()*100+firstCellStartTime.minute())
-            // const timeIsAfterSelection = (endTime.hour()*100+endTime.minute() > currentCellEndTime.hour()*100+currentCellEndTime.minute())
 
             const selected = !(isBeforeSelection || isAfterSelection)
-            // if(!selected) return;
 
-            cell.selected = selected
+            if(!selected) cell = undefined
+            else cell.selected = firstCell.selected
         })
+
+        temporaryCells.value = _.merge(_.cloneDeep(cells.value), _.pickBy(temporaryCells.value, cell=>cell.selected == firstCell.selected))
+
     }
 
     function onMouseUp(currentCell){
+        if(!firstCell) return;
         firstCell = null
-        // props.onEdited(cells)
+        cells.value = temporaryCells.value
+        temporaryCells.value = {}
     }
 </script>
 
 <template>
-    <section class="timeTable" :style="`
-        grid-template-columns: repeat(${days.length+1}, 1fr)
-        grid-template-rows: repeat(${hours.length * 4}, 1fr)
-    `">
+    <section class="timeTable"
+        @mouseleave="()=>onMouseUp(null)" 
+        :style="`
+            grid-template-columns: repeat(${days.length+1}, 1fr)
+            grid-template-rows: repeat(${hours.length * 4}, 1fr)
+        `"
+    >
         <header class="days" :style="`grid-column: 2/${days.length+2}`">
             <div v-for="day in days" class="day" :innerHTML="day"></div>
         </header>
         <aside class="hours" :style="`grid-row: 2/${hours.length*4+2}`">
             <div v-for="hour in hours" class="hour">{{ hour }}</div>
         </aside>
-        <TimeCell v-for="cell in cells"
+        <TimeCell v-for="cell in _.size(temporaryCells) ? temporaryCells : cells"
             :key="cell.startTime"
             :startTime="cell.startTime"
             :endTime="cell.endTime"
