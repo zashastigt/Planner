@@ -19,6 +19,7 @@
         @[onMouseUp?"mouseup":null]     ="onMouseUp({startTime, endTime, selected})"
     >
         <!-- {{ dayjs.unix(startTime).hour()*100+dayjs.unix(startTime).minute() }} -->
+        {{ startTime }}
     </div>
 </template>
 <style scoped>

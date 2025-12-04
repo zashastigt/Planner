@@ -1,8 +1,13 @@
 <script setup>
     import dayjs from 'dayjs'
+    import minmax from 'dayjs/plugin/minMax'
+    import dayjsTimePlugin from '../../snippets/dayjsTimePlugin'
     import _ from 'underscore'
     import TimeCell from './TimeCell.vue'
     import {ref} from 'vue'
+
+    dayjs.extend(dayjsTimePlugin)
+        .extend(minmax)
 
     const props = defineProps([
         "startDate",
@@ -12,8 +17,10 @@
         "onEdited"
     ])
 
-    const startDate = dayjs.unix(props.startDate).set("hour", 0).set("minute", 0).set("second", 0)
-    const endDate   = dayjs.unix(props.endDate).set("hour", 0).set("minute", 0).set("second", 0)
+    console.log(dayjs.unix(props.startDate))
+    const startDate = dayjs.unix(props.startDate).time(0)
+    console.log(dayjs.unix(props.endDate))
+    const endDate   = dayjs.unix(props.endDate).time(0)
     const cells = ref({})
 
     let currentDate = startDate
@@ -55,15 +62,25 @@
     function onMouseOver(currentCell){
         if(!firstCell) return;
 
-        const selectionStartTime = dayjs.unix(Math.min(firstCell.startTime, currentCell.startTime))
-        const selectionEndTime = dayjs.unix(Math.max(firstCell.endTime, currentCell.endTime))
+        // firstCell.startTime = 1765347300
+        // currentCell.startTime = 1765727100
 
+        // if(currentCell.startTime == 1766041200) debugger;
+        const selectionSmallestTime = dayjs.min(dayjs.unix(firstCell.startTime).time(), dayjs.unix(currentCell.startTime).time())
+        const selectionLargestTime = dayjs.max(dayjs.unix(firstCell.startTime).time(), dayjs.unix(currentCell.startTime).time())
+        
+        const selectionSmallestDate = dayjs.min(dayjs.unix(firstCell.startTime), dayjs.unix(currentCell.startTime))
+        const selectionLargestDate = dayjs.max(dayjs.unix(firstCell.startTime), dayjs.unix(currentCell.startTime))
+        
+        const selectionStartDate = selectionSmallestDate.time(selectionSmallestTime) 
+        const selectionEndDate = selectionLargestDate.time(selectionLargestTime)
+        
         _.each(cells.value, (cell)=>{
             const startTime = dayjs.unix(cell.startTime)
-            const endTime = dayjs.unix(cell.endTime)
-
-            const isBeforeSelection = startTime.isBefore(selectionStartTime) || startTime.hour()*100+startTime.minute() < selectionStartTime.hour()*100+selectionStartTime.minute()
-            const isAfterSelection = endTime.isAfter(selectionEndTime) || endTime.hour()*100+endTime.minute() > selectionEndTime.hour()*100+selectionEndTime.minute()
+            // const endTime = dayjs.unix(cell.endTime)
+            // if(cell.startTime == 1765683900) debugger;
+            const isBeforeSelection = startTime.isBefore(selectionStartDate) || startTime.time().isBefore(selectionStartDate.time())
+            const isAfterSelection = startTime.isAfter(selectionEndDate) || startTime.time().isAfter(selectionEndDate.time())
             // const timeIsBeforeSelection = (startTime.hour()*100+startTime.minute() < firstCellStartTime.hour()*100+firstCellStartTime.minute())
             // const timeIsAfterSelection = (endTime.hour()*100+endTime.minute() > currentCellEndTime.hour()*100+currentCellEndTime.minute())
 
@@ -76,7 +93,7 @@
 
     function onMouseUp(currentCell){
         firstCell = null
-        props.onEdited(cells)
+        // props.onEdited(cells)
     }
 </script>
 
