@@ -62,18 +62,18 @@ const localHour = ref(dayjs()
 .timeCell {
     height: 8px;
     width: 40px;
-}
 
-.timeCell:nth-child(3) {
-    border-top: var(--table-border-color) dashed 1px;
-}
+    &:nth-child(3) {
+        border-top: var(--table-border-color) dashed 1px;
+    }
 
-.timeCell:nth-child(4) {
-    border-bottom: var(--table-border-color) solid 1px;
-}
-
-.timeCell:hover {
-    background-color: v-bind(hoverColor) !important;
+    &:nth-child(4) {
+        border-bottom: var(--table-border-color) solid 1px;
+    }
+    
+    &:hover {
+        background-color: v-bind(hoverColor) !important;
+    }
 }
 
 .hourText {

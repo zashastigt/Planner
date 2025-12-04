@@ -2,7 +2,7 @@
 import { ChromePicker } from 'vue-color'
 import { useColorStore } from '../store/store'
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 const colorStore = useColorStore()
 const { color } = storeToRefs(colorStore)
@@ -49,10 +49,10 @@ const showPicker = ref(false)
         height: 25px;
         background-color: var(--light-gray);
         color: var(--black);
-    }
-
-    .title:hover {
-        background-color: var(--light-gray);
-        color: var(--black);
+        
+        &:hover {
+            background-color: var(--light-gray);
+            color: var(--black);
+        }
     }
 </style>
