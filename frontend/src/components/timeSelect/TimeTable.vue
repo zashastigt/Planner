@@ -3,7 +3,7 @@
     import minmax from 'dayjs/plugin/minMax'
     import _ from 'lodash'
     import TimeCell from './TimeCell.vue'
-    import {ref, onBeforeUpdate, onBeforeMount, onMounted} from 'vue'
+    import {ref, watch, onBeforeMount} from 'vue'
 
     dayjs.extend(minmax)
 
@@ -35,15 +35,12 @@
         }
         currentDate = newDate 
     }
+    const emptyCells = cells.value
 
-    let availabilityLoaded = false
-    onMounted(()=>_.merge(cells.value, props.cells))
-    // onBeforeUpdate(()=>{
-    //     if(availabilityLoaded) return;
-
-       
-    //     availabilityLoaded = true;
-    // })
+    watch(()=>props.cells, ()=>{
+        cells.value = _.merge(_.cloneDeep(emptyCells), props.cells)
+    })
+    onBeforeMount(()=>cells.value = _.merge(_.cloneDeep(emptyCells), props.cells))
 
     let days = []
     let lastDay = ""

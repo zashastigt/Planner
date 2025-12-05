@@ -39,7 +39,7 @@
             maxAvailabilityCells.value = availabilitiesToMaxAvailability(res)
         })
         ;(new EventSource(`${import.meta.env.VITE_API_ENDPOINT}planning/${urlId()}/sse`)).onmessage = ({data})=>{
-            maxAvailabilityCells.value = null//availabilitiesToMaxAvailability(JSON.parse(data))
+            maxAvailabilityCells.value = availabilitiesToMaxAvailability(JSON.parse(data))
         }
     })
 

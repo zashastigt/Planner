@@ -46,10 +46,9 @@ export function timeRangesToCells(timeRanges, interval) {
     const cells = {};
 
     for(const timeRange of timeRanges){
-        debugger
-
         const startTime = dayjs.unix(timeRange.startTime)
         const endTime = dayjs.unix(timeRange.endTime)
+        
         let currentTime = startTime
         while(currentTime.isBefore(endTime)){
             const nextTime = currentTime.add(interval, 'minute')
