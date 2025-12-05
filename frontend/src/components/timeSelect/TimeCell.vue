@@ -13,11 +13,12 @@
 </script>
 <template>
     <div 
-        :class="`timeCell ${props.selected ? 'selected' : ''}`"
+        :class="`timeCell${props.selected ? ' selected' : ''}${props.onMouseDown ? ' editable' : ''}`"
         @[onMouseDown?"mousedown":null] ="onMouseDown({startTime, endTime, selected})"
         @[onMouseOver?"mouseover":null] ="onMouseOver({startTime, endTime, selected})"
-        @[onMouseUp?"mouseup":null]     ="onMouseUp({startTime, endTime, selected})"
+        @[onMouseUp?"mouseup":null]     ="onMouseUp()"
     >
+    {{ props.startTime }}
     </div>
 </template>
 <style scoped>
@@ -35,8 +36,10 @@
         &.selected{
             background-color: green;
         }
-        &:hover{
-            background-color: rgba(0, 128, 0, 0.629);
+        &.editable{
+            &:hover{
+                background-color: rgba(0, 128, 0, 0.629);
+            }
         }
     }
 </style>

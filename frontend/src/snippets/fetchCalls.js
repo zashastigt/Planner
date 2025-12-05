@@ -1,11 +1,11 @@
 import dayjs from 'dayjs'
 import { router } from '../router.js';
 import { useDBCallStore } from '../store/store';
-import { readAvailableTimes } from './readAvailableTimes.js';
+import { cellsToTimeRanges } from './cellsToTimeRanges.js';
 
 const baseUrl = `${import.meta.env.VITE_API_ENDPOINT}planning`
 
-const urlId = () => {
+export const urlId = () => {
     const pageUrl = router.currentRoute._value
     const planningId = pageUrl.params.planningId
     return planningId
@@ -73,8 +73,8 @@ export async function getAvailability() {
     return availablilityTimes
 }
 
-export async function sendAvailability(name, timeTable) {
-    const availableTimes = readAvailableTimes(timeTable)
+export async function sendAvailability(name, cells) {
+    const timeRanges = cellsToTimeRanges(cells)
 
     await fetch(`${baseUrl}/${urlId()}/availability/create`, {
         method: "POST",
@@ -83,7 +83,7 @@ export async function sendAvailability(name, timeTable) {
         },
         body: JSON.stringify({
             name: name,
-            times: availableTimes
+            times: timeRanges
         })
     });
 }
