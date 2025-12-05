@@ -90,13 +90,14 @@
         width: 100vw;
         height: 100vh;
         justify-content: center;
+        align-items: center;
 
         .side {
             display: flex;
             align-items: flex-start;
             width: 50%;
             padding: 0 30px;
-            padding-top: 15%;
+            height: max-content;
             &.left {
                 justify-content: flex-end;
             }
