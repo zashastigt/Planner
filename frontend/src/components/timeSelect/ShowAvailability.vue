@@ -66,7 +66,7 @@ function createJson(startDate, endDate, usersAvailabilities = []) {
         display: flex;
         user-select: none;
         margin: 20px;
-        color: aliceblue;
+        color: var(--table-border-color);
     }
 
     .timeColumn {

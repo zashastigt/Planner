@@ -3,9 +3,7 @@
     import InputName from '../components/InputName.vue';
     import TimeSelect from '../components/timeSelect/TimeSelect.vue';
     import { onBeforeMount, ref, computed } from 'vue';
-    import ShowAvailability from '../components/timeSelect/ShowAvailability.vue';
     import ColorPicker from '../components/ColorPicker.vue';
-    import PlannerMenu from '../components/PlannerMenu.vue';
     import TimeTable from '../components/timeSelect/TimeTable.vue'
     import _ from 'lodash'
     import { getAvailability, getPlanning, sendAvailability, urlId} from '../snippets/fetchCalls';
@@ -27,10 +25,6 @@
         return timeRangesToCells(personAvailability.times, 15)
     })
     const maxAvailabilityCells = ref(null)
-    // computed(()=>{
-    //     if(!availability.value) return null
-    //     return availabilitiesToMaxAvailability(availability.value)
-    // })
 
     onBeforeMount(()=>{
         getPlanning().then(res=>planning.value = res)
@@ -60,44 +54,56 @@
 </script>
 
 <template>
-    <!-- <div id="container" 
-    @mouseup="() => handleMouse?.handleMouseGone()"
-    @mouseleave="() => handleMouse?.handleMouseGone()">
-        <PlannerMenu />
-        
-        <Card v-if="nameCheck" title="Your Availability">
-            <TimeSelect ref="handleMouse" />
-        </Card>
-        <Card title="Group Availability">
-            <ShowAvailability />
-        </Card>
-    </div> -->
-    <Card v-if="!name" title="Input your name">
-        <InputName nameCheck="nameCheck" @updateNameCheck="_name=>name=_name" />
-    </Card>
-    <TimeTable v-if="planning && name && personCells !== null" 
-        :editable="true" 
-        :startDate="planning.startDate" 
-        :endDate="planning.endDate" 
-        :timeInterval="15"
-        :onEdited="saveSelection"
-        :cells="personCells"
-    />
-    <TimeTable v-if="planning && maxAvailabilityCells !== null" 
-        :editable="false" 
-        :startDate="planning.startDate" 
-        :endDate="planning.endDate" 
-        :timeInterval="15" 
-        :cells="maxAvailabilityCells"
-    />
+    <section class="availability">
+        <section class="side left">
+            <Card v-if="!name" title="Input your name">
+                <InputName nameCheck="nameCheck" @updateNameCheck="_name=>name=_name" />
+            </Card>
+            <Card v-if="planning && name && personCells !== null" title="Your availability">
+                <TimeTable 
+                    :editable="true" 
+                    :startDate="planning.startDate" 
+                    :endDate="planning.endDate" 
+                    :timeInterval="15"
+                    :onEdited="saveSelection"
+                    :cells="personCells"
+                />
+            </Card>
+        </section>
+        <section class="side right">
+            <Card v-if="planning && maxAvailabilityCells !== null" title="Group availability">
+                <TimeTable 
+                    :editable="false" 
+                    :startDate="planning.startDate" 
+                    :endDate="planning.endDate" 
+                    :timeInterval="15" 
+                    :cells="maxAvailabilityCells"
+                />
+            </Card>
+            <ColorPicker />
+        </section>
+    </section>
 </template>
 
 <style scoped>
-    #container {
+    .availability {
         display: flex;
         width: 100vw;
-        min-height: 100vh;
+        height: 100vh;
         justify-content: center;
-        align-items: center;
+
+        .side {
+            display: flex;
+            align-items: flex-start;
+            width: 50%;
+            padding: 0 30px;
+            padding-top: 15%;
+            &.left {
+                justify-content: flex-end;
+            }
+            &.right {
+                justify-content: flex-start;
+            }
+        }
     }
 </style>

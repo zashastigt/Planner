@@ -1,11 +1,12 @@
 <script setup>
 const props = defineProps([
-    'title'
+    'title',
+    'class'
 ])
 </script>
 
 <template>
-    <div id="card">
+    <div :class="`card${props.class ? ' '+props.class : ''}`">
         <div class="header">{{ title }}</div>
         <div class="content">
             <slot></slot>
@@ -15,17 +16,20 @@ const props = defineProps([
 </template>
 
 <style scoped>
-    #card {
-        margin: 0 50px;
-        background-color: rgb(38, 38, 38);
-        color: #000;
-        border: 1px solid rgb(195, 195, 195);
+    .card {
+        width: fit-content;
+        color: var(--black);
+        border: 1px solid var(--light-gray);
+        background-color: var(--light-gray);
         border-radius: 20px 20px 0 20px;
+        overflow: hidden;
+        .header {
+            height: 25px;
+            background-color: var(--light-gray);        
+        }
+        .content{
+            background-color: var(--dark-gray);
+        }
     }
 
-    .header {
-        height: 20px;
-        border-radius: 20px 20px 0 0 ;
-        background-color: rgb(195, 195, 195);
-    }
 </style>

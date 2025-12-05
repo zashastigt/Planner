@@ -144,6 +144,8 @@
         display: grid;
         grid-auto-flow: column;
         user-select: none;
+        padding: 10px;
+        color: white;
         .days{
             display: grid;
             grid-template-columns: subgrid;

@@ -1,5 +1,10 @@
 <script setup>
     import dayjs from 'dayjs'
+    import { useColorStore } from '../../store/store'
+    import { storeToRefs } from 'pinia'
+
+    const colorStore = useColorStore()
+    const { color } = storeToRefs(colorStore)
 
     const props = defineProps([
         "startTime",
@@ -18,27 +23,26 @@
         @[onMouseOver?"mouseover":null] ="onMouseOver({startTime, endTime, selected})"
         @[onMouseUp?"mouseup":null]     ="onMouseUp()"
     >
-    {{ props.startTime }}
     </div>
 </template>
 <style scoped>
     .timeCell{
         width: 40px;
         height: 8px;
-        border-right: 1px solid white;
+        border-right: 1px solid var(--table-border-color);
         font-size: 40%;
         &:nth-child(4n+2){
-            border-bottom: 1px solid white;
+            border-bottom: 1px solid var(--table-border-color);
         }
         &:nth-child(4n+1){
-            border-top: 1px dotted white;
+            border-top: 1px dotted var(--table-border-color);
         }
         &.selected{
-            background-color: green;
+            background-color: v-bind(color);
         }
         &.editable{
             &:hover{
-                background-color: rgba(0, 128, 0, 0.629);
+                background-color: v-bind('color + 88');
             }
         }
     }
