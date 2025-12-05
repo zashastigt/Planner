@@ -31,10 +31,10 @@
         height: 8px;
         border-right: 1px solid var(--table-border-color);
         font-size: 40%;
-        &:nth-child(4n+2){
+        &:nth-child(4n){
             border-bottom: 1px solid var(--table-border-color);
         }
-        &:nth-child(4n+1){
+        &:nth-child(4n-1){
             border-top: 1px dotted var(--table-border-color);
         }
         &.selected{

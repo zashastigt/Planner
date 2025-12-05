@@ -114,28 +114,26 @@
 </script>
 
 <template>
-    <section class="timeTable"
-        @mouseleave="()=>onMouseUp(null)"
-        :style="`
-            grid-template-columns: repeat(${days.length+1}, 1fr)
-            grid-template-rows: repeat(${hours.length * 4}, 1fr)
-        `"
-    >
-        <header class="days" :style="`grid-column: 2/${days.length+2}`">
+    <section class="timeTable">
+        <header class="days">
             <div v-for="day in days" class="day" :innerHTML="day"></div>
         </header>
-        <aside class="hours" :style="`grid-row: 2/${hours.length*4+2}`">
+        <aside class="hours">
             <div v-for="hour in hours" class="hour">{{ hour }}</div>
         </aside>
-        <TimeCell v-for="cell in _.size(temporaryCells) ? temporaryCells : cells"
-            :key="cell.startTime"
-            :startTime="cell.startTime"
-            :endTime="cell.endTime"
-            :selected="cell.selected"
-            :onMouseDown="editable ? onMouseDown : null"
-            :onMouseOver="editable ? onMouseOver : null"
-            :onMouseUp="editable ? onMouseUp : null"
-        />
+        <div class="cells"
+            @mouseleave="()=>onMouseUp(null)"
+        >
+            <TimeCell v-for="cell in _.size(temporaryCells) ? temporaryCells : cells"
+                :key="cell.startTime"
+                :startTime="cell.startTime"
+                :endTime="cell.endTime"
+                :selected="cell.selected"
+                :onMouseDown="editable ? onMouseDown : null"
+                :onMouseOver="editable ? onMouseOver : null"
+                :onMouseUp="editable ? onMouseUp : null"
+            />
+        </div>
     </section>
 </template>
 
@@ -146,9 +144,14 @@
         user-select: none;
         padding: 10px;
         color: white;
+
+        grid-template-columns:  v-bind('`repeat(${days.length+1}, max-content)`');
+        grid-template-rows:     v-bind('`repeat(${hours.length*4}, max-content)`');
+
         .days{
             display: grid;
             grid-template-columns: subgrid;
+            grid-column: v-bind('`2/${days.length+2}`');
             .day{
                 display: grid;
                 border-bottom: 1px solid white;
@@ -162,9 +165,19 @@
             line-height: 1;
             border-right: 1px solid white;
             padding-right: 5px;
+            grid-row: v-bind('`2/${hours.length*4+2}`');
             .hour{
                 grid-row: span 4
             }
+        }
+
+        .cells{
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-columns: subgrid;
+            grid-template-rows: subgrid;
+            grid-column: v-bind('`2/${days.length+2}`');
+            grid-row: v-bind('`2/${hours.length*4+2}`');
         }
     }
 </style>
