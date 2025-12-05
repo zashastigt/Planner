@@ -1,10 +1,5 @@
 <script setup>
-    import dayjs from 'dayjs'
-    import { useColorStore } from '../../store/store'
-    import { storeToRefs } from 'pinia'
-
-    const colorStore = useColorStore()
-    const { color } = storeToRefs(colorStore)
+    import { ref } from 'vue';
 
     const props = defineProps([
         "startTime",
@@ -15,12 +10,22 @@
         "onMouseOver"
     ])
 
+    const selecting = ref(false)
+
 </script>
 <template>
     <div 
-        :class="`timeCell${props.selected ? ' selected' : ''}${props.onMouseDown ? ' editable' : ''}`"
+        :class="`
+            timeCell
+            ${props.selected ? ' selected' : ''}
+            ${props.onMouseDown ? ' editable' : ''}
+            ${selecting ? ' selecting' : ''}
+        `"
         @[onMouseDown?"mousedown":null] ="onMouseDown({startTime, endTime, selected})"
-        @[onMouseOver?"mouseover":null] ="onMouseOver({startTime, endTime, selected})"
+        @[onMouseOver?"mouseover":null] ="(e)=>{
+            selecting = e.buttons === 1
+            onMouseOver({startTime, endTime, selected})
+        }"
         @[onMouseUp?"mouseup":null]     ="onMouseUp()"
     >
     </div>
@@ -38,11 +43,11 @@
             border-top: 1px dotted var(--table-border-color);
         }
         &.selected{
-            background-color: v-bind(color);
+            background-color: var(--planner-color);
         }
-        &.editable{
+        &.editable:not(.selecting){
             &:hover{
-                background-color: v-bind('color + 88');
+                background-color: var(--planner-color--hover);
             }
         }
     }

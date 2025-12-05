@@ -1,20 +1,16 @@
 <script setup>
-import dayjs from 'dayjs'
-import { DatePicker } from 'v-calendar';
-import { ref } from 'vue';
-import { router } from '../router.js';
-import { useDBCallStore } from '../store/store';
-import { createPlanning } from '../snippets/fetchCalls.js';
+    import { DatePicker } from 'v-calendar';
+    import { ref } from 'vue';
+    import { createPlanning } from '../snippets/fetchCalls.js';
 
-const date = ref({
-    start: new Date(),
-    end: new Date()
-})
+    const date = ref({
+        start: new Date(),
+        end: new Date()
+    })
 
-const useWebhook = ref(false)
+    const useWebhook = ref(false)
 
-const webhookUrl = ref(localStorage.getItem("webhook"))
-
+    const webhookUrl = ref(localStorage.getItem("webhook"))
 </script>
 
 <template>

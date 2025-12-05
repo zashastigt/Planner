@@ -1,7 +1,6 @@
 <script setup>
     import Card from '../components/Card.vue'
     import InputName from '../components/InputName.vue';
-    import TimeSelect from '../components/timeSelect/TimeSelect.vue';
     import { onBeforeMount, ref, computed } from 'vue';
     import ColorPicker from '../components/ColorPicker.vue';
     import TimeTable from '../components/timeSelect/TimeTable.vue'

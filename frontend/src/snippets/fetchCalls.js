@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import { router } from '../router.js';
-import { useDBCallStore } from '../store/store';
 import { cellsToTimeRanges } from './cellsToTimeRanges.js';
 
 const baseUrl = `${import.meta.env.VITE_API_ENDPOINT}planning`
@@ -41,8 +40,6 @@ export async function createPlanning(date, webhook="") {
     });
 
     const planningDto = await response.json();
-    const dbCallStore = useDBCallStore()
-    dbCallStore.setPlanningDto(planningDto)
     
     if(webhook){
         fetch(`${webhook}`, {
