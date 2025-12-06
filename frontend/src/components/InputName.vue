@@ -1,6 +1,5 @@
 <script setup>
-import { storeToRefs } from 'pinia';
-import { useTimeStore, useTimeCellIdsStore, useAvailabilityStore } from '../store/store';
+import { ref } from 'vue';
 
 const props = defineProps([
     'nameCheck'
@@ -8,28 +7,14 @@ const props = defineProps([
 
 const emit = defineEmits()
 
-const timeStore = useTimeStore()
-const { name } = storeToRefs(timeStore)
+const name = ref("")
 
-function getTable() {
-    if (name.value.length === 0) return
-    emit('updateNameCheck', true) 
-
-    const timeCellIdsStore = useTimeCellIdsStore()
-    const availabilityStore = useAvailabilityStore()
-
-    for (const user of availabilityStore.availability) {
-        if (user.name === name.value) {
-            timeCellIdsStore.setTimeCellAndJsonActive(user.times)
-            break;
-        }
-    }    
+function updateNameCheck() {
+    emit('updateNameCheck', name.value)
 }
 
 function handleKeyUp(event) {
-    if (event.key === 'Enter') {
-        getTable()
-    }
+    if (event.key === 'Enter') updateNameCheck()
 }
 
 </script>
@@ -37,7 +22,7 @@ function handleKeyUp(event) {
 <template>
     <div class="inputName">
         <input type="text" v-model="name" @keyup="handleKeyUp"></input>
-        <button @click="getTable" >
+        <button @click="updateNameCheck" >
             <img src="../assets/loginWhite.png" />
         </button>
     </div>
@@ -70,6 +55,7 @@ function handleKeyUp(event) {
         height: 30px;
         border: none;
         width: 30px;
+        z-index: 2;
         background-color: var(--medium-gray);
     }
 

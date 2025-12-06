@@ -1,83 +1,62 @@
 <script setup>
-import { storeToRefs } from 'pinia';
-import { useTimeStore, useTimeCellIdsStore, useColorStore } from '../../store/store';
-import { computed, ref } from 'vue';
-import dayjs from 'dayjs';
+    import { computed, getCurrentInstance, ref } from 'vue';
 
-const props = defineProps([
-    'hour',
-    'hourKey',
-    'dayKey',
-    'index',
-    'hourIndex',
-    'isMouseDown'
-])
+    const props = defineProps([
+        "startTime",
+        "endTime",
+        "selected",
+    ])
 
-// Stores
-const timeCellIdsStore = useTimeCellIdsStore()
-const timeStore = useTimeStore()
+    const emit = defineEmits([
+        "mouseDown",
+        "mouseOver",
+        "mouseUp"
+    ])
+    const selecting = ref(false)
+    const editable = computed(()=>{
+        return getCurrentInstance()?.vnode.props.onMouseDown
+            && getCurrentInstance()?.vnode.props.onMouseOver
+            && getCurrentInstance()?.vnode.props.onMouseUp
+    });
 
-const colorStore = useColorStore()
-const { color } = storeToRefs(colorStore)
-const hoverColor = computed(() => (props.isMouseDown ? 'transparent' : color.value + '88'))
 
-const localHour = ref(dayjs()
-    .set('hour', props.hourKey.substring(0, 2))
-    .set('minute', props.hourKey.substring(3, 5))
-    .add(Number(dayjs().format().split('+')[1].substring(0, 2)), 'hour')
-    .format('HH:mm'))
 </script>
-
 <template>
-    <div class="tab">
-        <span class="hourText" v-if="index === 0">{{ localHour }}</span>
-        <div class="cellBlock">
-            <div
-                class="timeCell"
-                v-for="(selected, index) in hour"
-                :id="timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart"
-                :key="index"
-                :style="{ backgroundColor: 
-                    timeCellIdsStore.timeCellIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) || 
-                    timeCellIdsStore.timeCellTempIds.has(timeStore.editableTimeTable[props.dayKey][props.hourKey][index].timestampStart) ? 
-                    color : 'transparent'}">
-            </div>
-            
-        </div>
+    <div 
+        :class="`
+            timeCell
+            ${props.selected ? ' selected' : ''}
+            ${editable ? ' editable' : ''}
+            ${selecting ? ' selecting' : ''}
+        `"
+        @mousedown="()=>emit('mouseDown', {startTime, endTime, selected})"
+        @mouseover="(e)=>{
+            selecting = e.buttons === 1
+            emit('mouseOver', {startTime, endTime, selected})
+        }"
+        @mouseup = "()=>emit('mouseUp', {startTime, endTime, selected})"
+    >
     </div>
 </template>
-
 <style scoped>
-.tab {
-    display: flex;
-    justify-content: end;
-    align-items: flex-start;
-}
-
-.cellBlock {
-    border: white solid 1px;
-    border-bottom: none;
-}
-
-.timeCell {
-    height: 8px;
-    width: 40px;
-}
-
-.timeCell:nth-child(3) {
-    border-top: var(--table-border-color) dashed 1px;
-}
-
-.timeCell:nth-child(4) {
-    border-bottom: var(--table-border-color) solid 1px;
-}
-
-.timeCell:hover {
-    background-color: v-bind(hoverColor) !important;
-}
-
-.hourText {
-    margin-top: -11px;
-    margin-right: 5px;
-}
+    .timeCell{
+        width: 40px;
+        height: 8px;
+        border-right: 1px solid var(--table-border-color);
+        font-size: 40%;
+        &:nth-child(4n){
+            border-bottom: 1px solid var(--table-border-color);
+        }
+        &:nth-child(4n-1){
+            border-top: 1px dotted var(--table-border-color);
+        }
+        &.selected{
+            background-color: var(--planner-color);
+        }
+        &.editable:not(.selecting){
+            &:hover{
+                background-color: var(--planner-color--hover);
+            }
+        }
+    }
 </style>

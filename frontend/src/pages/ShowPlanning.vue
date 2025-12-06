@@ -1,66 +1,111 @@
 <script setup>
-import Card from '../components/Card.vue'
-import InputName from '../components/InputName.vue';
-import TimeSelect from '../components/timeSelect/TimeSelect.vue';
-import { ref } from "vue";
-import ShowAvailibility from '../components/timeSelect/ShowAvailibility.vue';
-import ColorPicker from '../components/ColorPicker.vue';
+    import Card from '../components/Card.vue'
+    import InputName from '../components/InputName.vue';
+    import { onBeforeMount, ref, computed } from 'vue';
+    import ColorPicker from '../components/ColorPicker.vue';
+    import TimeTable from '../components/timeSelect/TimeTable.vue'
+    import _ from 'lodash'
+    import { getAvailability, getPlanning, sendAvailability, urlId} from '../snippets/fetchCalls';
+    import { timeRangesToCells } from '../snippets/cellsToTimeRanges';
+    import { useDateSavingStore } from '../store/store';
 
-defineProps({
-    planningId: Number
-})
 
-const handleMouse = ref(null);
-const nameCheck = ref(false)
-const updateNameCheck = (newValue) => {
-    nameCheck.value = newValue
-}
+    defineProps({
+        planningId: Number
+    })
+
+    const dateStore = useDateSavingStore()
+    const name = ref("")
+    const planning = ref(null)
+    const availability = ref(null)
+    const personCells = computed(()=>{
+        if(!name.value) return null
+
+        const personAvailability = availability.value.filter(person=>person.name===name.value)[0]
+        if(!personAvailability) return {}
+        return timeRangesToCells(personAvailability.times, 15)
+    })
+    const maxAvailabilityCells = ref(null)
+
+    onBeforeMount(()=>{
+        planning.value = dateStore.dates
+        if (Object.keys(planning.value).length === 0) getPlanning().then(res=>planning.value = res);
+
+        getAvailability().then((res)=>{
+            availability.value = res
+            maxAvailabilityCells.value = availabilitiesToMaxAvailability(res)
+        })
+        ;(new EventSource(`${import.meta.env.VITE_API_ENDPOINT}planning/${urlId()}/sse`)).onmessage = ({data})=>{
+            maxAvailabilityCells.value = availabilitiesToMaxAvailability(JSON.parse(data))
+        }
+    })
+
+    function availabilitiesToMaxAvailability(availabilities){
+        let cells = {}
+        for(const person of availabilities){
+            const personCells = timeRangesToCells(person.times, 15)
+
+            if(!_.size(cells)) cells = personCells
+            else cells = _.pick(cells, _.intersection(Object.keys(cells), Object.keys(personCells)))
+        }
+        return cells
+    }
+
+    function saveSelection(cells){        
+        sendAvailability(name.value, cells)
+    }
 </script>
 
 <template>
-    <div id="container" 
-    @mouseup="() => handleMouse?.handleMouseGone()"
-    @mouseleave="() => handleMouse?.handleMouseGone()">
-        <div class="left side">
-            <Card v-if="!nameCheck" title="Input your name">
-                <InputName nameCheck="nameCheck" @updateNameCheck="updateNameCheck" />
+    <section class="availability">
+        <section class="side left">
+            <Card v-if="!name" title="Input your name">
+                <InputName nameCheck="nameCheck" @updateNameCheck="_name=>name=_name" />
             </Card>
-            <Card v-if="nameCheck" title="Your Availibility">
-                <TimeSelect ref="handleMouse" />
+            <Card v-if="planning && name && personCells !== null" title="Your availability">
+                <TimeTable 
+                    :startDate="planning.startDate" 
+                    :endDate="planning.endDate" 
+                    :timeInterval="15"
+                    :cells="personCells"
+                    @edited="saveSelection"
+                />
             </Card>
-        </div>
-        <div class="right side">
-            <Card title="Group Availibility">
-                <ShowAvailibility />
+        </section>
+        <section class="side right">
+            <Card v-if="planning && maxAvailabilityCells !== null" title="Group availability">
+                <TimeTable 
+                    :startDate="planning.startDate" 
+                    :endDate="planning.endDate" 
+                    :timeInterval="15" 
+                    :cells="maxAvailabilityCells"
+                />
             </Card>
             <ColorPicker />
-        </div>
-        
-    </div>
-    
+        </section>
+    </section>
 </template>
 
 <style scoped>
-    #container {
+    .availability {
         display: flex;
         width: 100vw;
         height: 100vh;
         justify-content: center;
-    }
+        align-items: center;
 
-    .side {
-        display: flex;
-        align-items: flex-start;
-        width: 50%;
-        padding: 0 30px;
-        padding-top: 15%;
-    }
-
-    .left {
-        justify-content: flex-end;
-    }
-
-    .right {
-        justify-content: flex-start;
+        .side {
+            display: flex;
+            align-items: flex-start;
+            width: 50%;
+            padding: 0 30px;
+            height: max-content;
+            &.left {
+                justify-content: flex-end;
+            }
+            &.right {
+                justify-content: flex-start;
+            }
+        }
     }
 </style>
