@@ -10,7 +10,6 @@ const emit = defineEmits()
 const name = ref("")
 
 function updateNameCheck() {
-    console.log(name.value)
     emit('updateNameCheck', name.value)
 }
 

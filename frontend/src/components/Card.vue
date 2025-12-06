@@ -38,7 +38,7 @@ const props = defineProps([
         }
         &::after{
             content: "";
-            box-shadow: inset -10px 0px 10px var(--dark-gray);
+            box-shadow: inset -5px 0px 10px var(--dark-gray);
             position: absolute;
             inset: 0;
             left: 0;
