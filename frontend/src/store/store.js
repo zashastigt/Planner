@@ -13,3 +13,16 @@ export const useColorStore = defineStore('color', () => {
 
     return { color }
 })
+
+export const useDateSavingStore = defineStore('date', () => {
+    const dates = ref({})
+
+    function setDates(start, end) {
+        dates.value = {
+        startDate: start,
+        endDate: end
+        }
+    }
+
+    return { dates, setDates }
+})
