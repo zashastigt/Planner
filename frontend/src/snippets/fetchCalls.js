@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { router } from '../router.js';
 import { cellsToTimeRanges } from './cellsToTimeRanges.js';
+import { useDateSavingStore } from '../store/store.js';
 
 const baseUrl = `${import.meta.env.VITE_API_ENDPOINT}planning`
 
@@ -11,7 +12,9 @@ export const urlId = () => {
 }
 
 export async function createPlanning(date, webhook="") {
-
+    const dateStore = useDateSavingStore()
+    dateStore.setDates(dayjs(date.start).unix(), dayjs(date.end).unix())
+    
     if(webhook){
         localStorage.setItem("webhook", webhook)
         const messageId = (await fetch(`${webhook}?wait=true`, {
