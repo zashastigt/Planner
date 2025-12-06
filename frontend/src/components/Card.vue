@@ -23,13 +23,29 @@ const props = defineProps([
         background-color: var(--light-gray);
         border-radius: 20px 20px 0 20px;
         overflow: hidden;
+        position: relative;
+        isolation: isolate;
+
         .header {
             height: 25px;
             background-color: var(--light-gray);        
+            z-index: 2;
+            position: relative;
         }
         .content{
             background-color: var(--dark-gray);
+            overflow: auto;
+        }
+        &::after{
+            content: "";
+            box-shadow: inset 0px 0px 5px var(--dark-gray);
+            position: absolute;
+            inset: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
         }
     }
-
 </style>

@@ -21,12 +21,12 @@
             ${props.onMouseDown ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
-        @[onMouseDown?"mousedown":null] ="onMouseDown({startTime, endTime, selected})"
-        @[onMouseOver?"mouseover":null] ="(e)=>{
+        @[onMouseDown?"mousedown":null] = "onMouseDown({startTime, endTime, selected})"
+        @[onMouseOver?"mouseover":null] = "(e)=>{
             selecting = e.buttons === 1
             onMouseOver({startTime, endTime, selected})
         }"
-        @[onMouseUp?"mouseup":null]     ="onMouseUp()"
+        @[onMouseUp?"mouseup":null] = "onMouseUp()"
     >
     </div>
 </template>

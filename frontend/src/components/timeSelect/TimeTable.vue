@@ -141,12 +141,12 @@
     .timeTable{
         display: grid;
         grid-auto-flow: column;
+        grid-template-columns:  v-bind('`repeat(${days.length+1}, max-content)`');
+        grid-template-rows:     v-bind('`repeat(${hours.length*4}, max-content)`');
         user-select: none;
         padding: 10px;
         color: white;
-
-        grid-template-columns:  v-bind('`repeat(${days.length+1}, max-content)`');
-        grid-template-rows:     v-bind('`repeat(${hours.length*4}, max-content)`');
+        min-width: max-content;
 
         .days{
             display: grid;
@@ -159,15 +159,26 @@
                 gap: 5px;
             }
         }
+
         .hours{
             display: grid;
             grid-template-rows: subgrid;
+            position: sticky;
+            left: 0px;
+            background-color: var(--dark-gray);
             line-height: 1;
-            border-right: 1px solid white;
             padding-right: 5px;
-            grid-row: v-bind('`2/${hours.length*4+2}`');
+            padding-left: 10px;
+            margin-left: -10px;
+            margin-right: 5px;
+            box-shadow: 3px 0px 3px var(--dark-gray);
+            grid-row: v-bind('`1/${hours.length*4+2}`');
             .hour{
-                grid-row: span 4
+                grid-row: span 4;
+                translate: 0 -25%;
+            }
+            &::before{
+                content: "";
             }
         }
 
@@ -178,6 +189,7 @@
             grid-template-rows: subgrid;
             grid-column: v-bind('`2/${days.length+2}`');
             grid-row: v-bind('`2/${hours.length*4+2}`');
+            border-left: 1px solid white;
         }
     }
 </style>
