@@ -56,6 +56,7 @@ function handleKeyUp(event) {
         height: 30px;
         border: none;
         width: 30px;
+        z-index: 2;
         background-color: var(--medium-gray);
     }
 
