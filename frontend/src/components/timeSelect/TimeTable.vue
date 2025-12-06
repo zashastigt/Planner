@@ -167,8 +167,7 @@
             left: 0px;
             background-color: var(--dark-gray);
             line-height: 1;
-            padding-right: 5px;
-            padding-left: 10px;
+            padding: 0 5px 5px 10px;
             margin-left: -10px;
             margin-right: 5px;
             box-shadow: 3px 0px 3px var(--dark-gray);
