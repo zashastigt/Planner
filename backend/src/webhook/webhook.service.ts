@@ -24,7 +24,7 @@ export class WebhookService {
       for(const day of maxAvailability.days){
         const utcDay = dayjs.unix(day.times[0].startTime).utcOffset(timezone.utcOffset)
 
-        bodyText += `\u001b[1;37m${utcDay.format('D')} ${utcDay.format('ddd')}:\u001b[0;36m ${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(' \u001b[0;30m|\u001b[0;36m ')}\n`
+        bodyText += `\u001b[1;37m${utcDay.format('DD')} ${utcDay.format('ddd')}:\u001b[0;36m ${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(' \u001b[0;30m|\u001b[0;36m ')}\n`
       }
       bodyText += "```\n"
     }
@@ -36,7 +36,7 @@ export class WebhookService {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        content: `# [Current planning](${process.env.VITE_FRONTEND_URL}${planning.id}) voted: ${availabilities.length}\n${bodyText}`
+        content: `# [Current planning](${process.env.VITE_FRONTEND_URL}/${planning.id}) voted: ${availabilities.length}\n${bodyText}`
       })
     })
   }
