@@ -1,5 +1,12 @@
 import _ from 'lodash'
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import isBetween from 'dayjs/plugin/isBetween'
+
+dayjs.extend(timezone)
+dayjs.extend(utc)
+dayjs.extend(isBetween)
 
 export function cellsToTimeRanges(cells) {
     const ranges = [];
@@ -9,8 +16,11 @@ export function cellsToTimeRanges(cells) {
     _.forIn(cells, (cell)=>{
         if(cell.selected && !startTime) startTime = cell.startTime
         if(cell.selected && startTime) endTime = cell.endTime
+
+        const localStartTime = dayjs.unix(startTime).utc()
+        const localEndTime = dayjs.unix(endTime).utc()
         
-        if(!cell.selected && startTime && endTime) {
+        if((!cell.selected && startTime && endTime) || (cell.selected && !localStartTime.isSame(localEndTime, 'day'))) {
             ranges.push({startTime, endTime})
             startTime = null;
             endTime = null;

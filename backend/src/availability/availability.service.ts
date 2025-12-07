@@ -43,7 +43,8 @@ export class AvailabilityService {
         times: {
           startTime: true,
           endTime: true
-        }
+        },
+        timezone: true
       },
       where: {
          planning: { id }

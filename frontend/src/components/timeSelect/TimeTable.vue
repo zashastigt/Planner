@@ -4,8 +4,10 @@
     import _ from 'lodash'
     import TimeCell from './TimeCell.vue'
     import {ref, watch, onBeforeMount, computed, getCurrentInstance} from 'vue'
+    import isBetween from 'dayjs/plugin/isBetween'
 
     dayjs.extend(minmax)
+    dayjs.extend(isBetween)
 
     const props = defineProps([
         "startDate",
@@ -42,9 +44,14 @@
     const emptyCells = cells.value
 
     watch(()=>props.cells, ()=>{
-        cells.value = _.merge(_.cloneDeep(emptyCells), props.cells)
+        cells.value = mergeCells(emptyCells, props.cells)
     })
-    onBeforeMount(()=>cells.value = _.merge(_.cloneDeep(emptyCells), props.cells))
+    onBeforeMount(()=>cells.value = mergeCells(emptyCells, props.cells))
+
+    function mergeCells(mainCells, selectedCells) {
+        selectedCells = _.pickBy(selectedCells, (cell) => dayjs.unix(cell.startTime).isBetween(startDate, endDate, 'hour', []))
+        return _.merge(_.cloneDeep(mainCells), selectedCells)
+    }
 
     let days = []
     let lastDay = ""

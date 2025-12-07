@@ -8,14 +8,11 @@
     import _ from 'lodash'
     import { getAvailability, getPlanning, sendAvailability, urlId} from '../snippets/fetchCalls';
     import { timeRangesToCells } from '../snippets/cellsToTimeRanges';
-    import { useDateSavingStore } from '../store/store';
-
 
     defineProps({
         planningId: Number
     })
 
-    const dateStore = useDateSavingStore()
     const name = ref("")
     const planning = ref(null)
     const availability = ref(null)
@@ -29,8 +26,7 @@
     const maxAvailabilityCells = ref(null)
 
     onBeforeMount(()=>{
-        planning.value = dateStore.dates
-        if (Object.keys(planning.value).length === 0) getPlanning().then(res=>planning.value = res);
+        getPlanning().then(res=>planning.value = res);
 
         getAvailability().then((res)=>{
             availability.value = res
