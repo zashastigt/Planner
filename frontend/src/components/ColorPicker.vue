@@ -49,10 +49,9 @@ const showPicker = ref(false)
         height: 25px;
         background-color: var(--light-gray);
         color: var(--black);
-    }
-
-    .title:hover {
-        background-color: var(--light-gray);
-        color: var(--black);
+        &:hover {
+            background-color: var(--light-gray);
+            color: var(--black);
+        }
     }
 </style>

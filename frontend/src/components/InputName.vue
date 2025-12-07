@@ -33,43 +33,40 @@ function handleKeyUp(event) {
     .inputName {
         display: flex;
         align-items: start;
-    }
 
-    .inputName input {
-        height: 30px;
-        border: none;
-        font-size: 1em;
-        border-radius: 0 0 0 20px;
-        padding: 0 20px;
-    }
+        input {
+            height: 30px;
+            border: none;
+            font-size: 1em;
+            border-radius: 0 0 0 20px;
+            padding: 0 20px;
 
-    .inputName input:hover {
-        background-color: var(--small-lightening);
-    }
+            &:hover {
+                background-color: var(--small-lightening);
+            }
+            &:focus {
+                outline: none;
+            }       
+        }
 
-    .inputName input:focus {
-        outline: none;
-    }
-
-    .inputName button {
-        height: 30px;
-        border: none;
-        width: 30px;
-        z-index: 2;
-        background-color: var(--medium-gray);
-    }
-
-    .inputName button:hover {
-        background-color: var(--medium-lightening);
-    }
-
-    .inputName button:active {
-        background-color: var(--dark-gray);
-    }
-
-    .inputName button img {
-        height: 18px;
-        margin-right: auto;
-        margin-top: 5px;
+        button {
+            height: 30px;
+            border: none;
+            width: 30px;
+            z-index: 2;
+            background-color: var(--medium-gray);
+            
+            &:hover {
+                background-color: var(--medium-lightening);
+            }
+            &:active {
+                background-color: var(--dark-gray);
+            }
+            img {
+                height: 18px;
+                margin-right: auto;
+                margin-top: 5px;
+            }
+        }
     }
 </style>
