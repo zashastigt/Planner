@@ -18,4 +18,7 @@ export class Availability {
 
     @OneToMany(() => Time, (time) => time.availability)
     times: Time[]
+
+    @Column()
+    timezone: string
 }

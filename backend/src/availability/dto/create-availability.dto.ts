@@ -12,4 +12,6 @@ export class CreateAvailabilityDto {
     @IsNotEmpty()
     times: Time[]
 
+    @IsNotEmpty()
+    timezone: string
 }
