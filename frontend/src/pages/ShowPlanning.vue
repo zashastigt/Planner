@@ -1,13 +1,14 @@
 <script setup>
     import Card from '../components/Card.vue'
     import InputName from '../components/InputName.vue';
-    import { onBeforeMount, ref, computed, onBeforeUnmount } from 'vue';
+    import { onBeforeMount, ref} from 'vue';
     import ColorPicker from '../components/ColorPicker.vue';
     import TimeTable from '../components/timeSelect/TimeTable.vue'
     import NotAvailableButton from '../components/NotAvailableButton.vue';
     import _ from 'lodash'
     import { getAvailability, getPlanning, sendAvailability, urlId} from '../snippets/fetchCalls';
     import { timeRangesToCells } from '../snippets/cellsToTimeRanges';
+    import { watch } from 'vue';
 
     defineProps({
         planningId: Number
@@ -28,8 +29,10 @@
         })
         ;(new EventSource(`${import.meta.env.VITE_API_ENDPOINT}planning/${urlId()}/sse`)).onmessage = ({data})=>{
             maxAvailabilityCells.value = availabilitiesToMaxAvailability(JSON.parse(data))
-        }
+        }    
+    })
 
+    watch(()=>name.value, ()=> {
         if(!name.value) return null
         
         const personAvailability = availability.value.filter(person=>person.name===name.value)[0]
