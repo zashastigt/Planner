@@ -24,6 +24,9 @@ const props = defineProps([
         border: 1px solid var(--light-gray);
         border-radius: 20px 0 0 20px;
         overflow: hidden;
+        &:hover {
+            border: 1px solid var(--medium-gray);
+        }
 
         .button {
             padding: 0 5px 0 10px;
