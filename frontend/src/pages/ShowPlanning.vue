@@ -1,9 +1,10 @@
 <script setup>
     import Card from '../components/Card.vue'
     import InputName from '../components/InputName.vue';
-    import { onBeforeMount, ref, computed } from 'vue';
+    import { onBeforeMount, ref, computed, onBeforeUnmount } from 'vue';
     import ColorPicker from '../components/ColorPicker.vue';
     import TimeTable from '../components/timeSelect/TimeTable.vue'
+    import NotAvailableButton from '../components/NotAvailableButton.vue';
     import _ from 'lodash'
     import { getAvailability, getPlanning, sendAvailability, urlId} from '../snippets/fetchCalls';
     import { timeRangesToCells } from '../snippets/cellsToTimeRanges';
@@ -40,6 +41,12 @@
         }
     })
 
+    onBeforeUnmount(() => {
+        console.log('g');
+        
+        saveSelection({})
+    })
+
     function availabilitiesToMaxAvailability(availabilities){
         let cells = {}
         for(const person of availabilities){
@@ -59,10 +66,13 @@
 <template>
     <section class="availability">
         <section class="side left">
+            <NotAvailableButton :saveSelection="saveSelection" />
             <Card v-if="!name" title="Input your name">
                 <InputName nameCheck="nameCheck" @updateNameCheck="_name=>name=_name" />
             </Card>
+            
             <Card v-if="planning && name && personCells !== null" title="Your availability">
+                
                 <TimeTable 
                     :startDate="planning.startDate" 
                     :endDate="planning.endDate" 
@@ -70,6 +80,7 @@
                     :cells="personCells"
                     @edited="saveSelection"
                 />
+                
             </Card>
         </section>
         <section class="side right">
