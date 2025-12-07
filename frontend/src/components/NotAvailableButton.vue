@@ -17,6 +17,7 @@ const props = defineProps([
 
 <style scoped>
     .colorMenu {
+        width: 100px;
         margin-top: 25px;
         background-color: var(--dark-gray);
         color: var(--black);
@@ -28,6 +29,10 @@ const props = defineProps([
             padding: 0 5px 0 10px;
             background-color: var(--light-gray);
             font-size: 0.9em;
+            user-select: none;
+            &:hover {
+                background-color: var(--medium-lightening);
+            }
         }
     }
 </style>

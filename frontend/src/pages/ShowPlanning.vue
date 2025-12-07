@@ -66,7 +66,7 @@
 <template>
     <section class="availability">
         <section class="side left">
-            <NotAvailableButton :saveSelection="saveSelection" />
+            <NotAvailableButton v-if="planning && name && personCells !== null" :saveSelection="saveSelection" />
             <Card v-if="!name" title="Input your name">
                 <InputName nameCheck="nameCheck" @updateNameCheck="_name=>name=_name" />
             </Card>
