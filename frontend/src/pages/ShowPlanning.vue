@@ -36,7 +36,7 @@
         if(!name.value) return null
         
         const personAvailability = availability.value.filter(person=>person.name===name.value)[0]
-        if(!personAvailability) personCells.value = {}
+        if(!personAvailability) return personCells.value = {};
         personCells.value = timeRangesToCells(personAvailability.times, 15)
     })
 
