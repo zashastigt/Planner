@@ -1,7 +1,6 @@
 import dayjs from 'dayjs'
 import { router } from '../router.js';
 import { cellsToTimeRanges } from './cellsToTimeRanges.js';
-import { useDateSavingStore } from '../store/store.js';
 
 const baseUrl = `${import.meta.env.VITE_API_ENDPOINT}planning`
 
@@ -12,9 +11,6 @@ export const urlId = () => {
 }
 
 export async function createPlanning(date, webhook="") {
-    const dateStore = useDateSavingStore()
-    dateStore.setDates(dayjs(date.start).unix(), dayjs(date.end).unix())
-    
     if(webhook){
         localStorage.setItem("webhook", webhook)
         const messageId = (await fetch(`${webhook}?wait=true`, {
@@ -73,8 +69,9 @@ export async function getAvailability() {
     return availablilityTimes
 }
 
-export async function sendAvailability(name, cells) {
-    const timeRanges = cellsToTimeRanges(cells)
+export async function sendAvailability(name, cells, planning) {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const timeRanges = cellsToTimeRanges(cells, planning)
 
     await fetch(`${baseUrl}/${urlId()}/availability/create`, {
         method: "POST",
@@ -83,7 +80,8 @@ export async function sendAvailability(name, cells) {
         },
         body: JSON.stringify({
             name: name,
-            times: timeRanges
+            times: timeRanges,
+            timezone: timezone
         })
     });
 }
