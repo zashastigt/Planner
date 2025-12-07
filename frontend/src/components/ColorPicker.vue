@@ -49,6 +49,7 @@ const showPicker = ref(false)
         height: 25px;
         background-color: var(--light-gray);
         color: var(--black);
+        user-select: none;
         &:hover {
             background-color: var(--light-gray);
             color: var(--black);
