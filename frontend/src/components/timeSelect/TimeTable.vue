@@ -3,7 +3,7 @@
     import minmax from 'dayjs/plugin/minMax'
     import _ from 'lodash'
     import TimeCell from './TimeCell.vue'
-    import {ref, watch, onBeforeMount} from 'vue'
+    import {ref, watch, onBeforeMount, computed, getCurrentInstance} from 'vue'
     import isBetween from 'dayjs/plugin/isBetween'
 
     dayjs.extend(minmax)
@@ -13,14 +13,18 @@
         "startDate",
         "endDate",
         "timeInterval",
-        "editable",
-        "cells",
-        "onEdited"
+        "cells"
     ])
 
+    const emit = defineEmits([
+        "edited",
+    ])
+
+    
     const startDate = dayjs.unix(props.startDate).startOf('day')
     const endDate   = dayjs.unix(props.endDate).startOf('day')
     const cells = ref({})
+    const editable = computed(()=>getCurrentInstance()?.vnode.props.onEdited)
 
     const hours = []
     let currentDate = startDate
@@ -111,7 +115,7 @@
         firstCell = null
         cells.value = temporaryCells.value
         temporaryCells.value = {}
-        if(props.onEdited) props.onEdited(cells.value)
+        emit("edited", cells.value)
     }
 
     function seperateHourAndMinutes(time) {
@@ -136,9 +140,9 @@
                 :startTime="cell.startTime"
                 :endTime="cell.endTime"
                 :selected="cell.selected"
-                :onMouseDown="editable ? onMouseDown : null"
-                :onMouseOver="editable ? onMouseOver : null"
-                :onMouseUp="editable ? onMouseUp : null"
+                @[editable&&'mouseDown']="cell=>onMouseDown(cell)"
+                @[editable&&'mouseOver']="cell=>onMouseOver(cell)"
+                @[editable&&'mouseUp']="cell=>onMouseUp(cell)"
             />
         </div>
     </section>

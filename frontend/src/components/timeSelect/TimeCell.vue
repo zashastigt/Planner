@@ -1,16 +1,24 @@
 <script setup>
-    import { ref } from 'vue';
+    import { computed, getCurrentInstance, ref } from 'vue';
 
     const props = defineProps([
         "startTime",
         "endTime",
         "selected",
-        "onMouseUp",
-        "onMouseDown",
-        "onMouseOver"
     ])
 
+    const emit = defineEmits([
+        "mouseDown",
+        "mouseOver",
+        "mouseUp"
+    ])
     const selecting = ref(false)
+    const editable = computed(()=>{
+        return getCurrentInstance()?.vnode.props.onMouseDown
+            && getCurrentInstance()?.vnode.props.onMouseOver
+            && getCurrentInstance()?.vnode.props.onMouseUp
+    });
+
 
 </script>
 <template>
@@ -18,15 +26,15 @@
         :class="`
             timeCell
             ${props.selected ? ' selected' : ''}
-            ${props.onMouseDown ? ' editable' : ''}
+            ${editable ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
-        @[onMouseDown?"mousedown":null] = "onMouseDown({startTime, endTime, selected})"
-        @[onMouseOver?"mouseover":null] = "(e)=>{
+        @mousedown="()=>emit('mouseDown', {startTime, endTime, selected})"
+        @mouseover="(e)=>{
             selecting = e.buttons === 1
-            onMouseOver({startTime, endTime, selected})
+            emit('mouseOver', {startTime, endTime, selected})
         }"
-        @[onMouseUp?"mouseup":null] = "onMouseUp()"
+        @mouseup = "()=>emit('mouseUp', {startTime, endTime, selected})"
     >
     </div>
 </template>

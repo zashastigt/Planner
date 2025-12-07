@@ -60,19 +60,17 @@
             </Card>
             <Card v-if="planning && name && personCells !== null" title="Your availability">
                 <TimeTable 
-                    :editable="true" 
                     :startDate="planning.startDate" 
                     :endDate="planning.endDate" 
                     :timeInterval="15"
-                    :onEdited="saveSelection"
                     :cells="personCells"
+                    @edited="saveSelection"
                 />
             </Card>
         </section>
         <section class="side right">
             <Card v-if="planning && maxAvailabilityCells !== null" title="Group availability">
                 <TimeTable 
-                    :editable="false" 
                     :startDate="planning.startDate" 
                     :endDate="planning.endDate" 
                     :timeInterval="15" 
