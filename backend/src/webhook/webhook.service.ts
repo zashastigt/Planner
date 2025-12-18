@@ -17,7 +17,7 @@ export class WebhookService {
 
     for (const timezone of maxAvailability.timezones) {
       const operator = timezone.utcOffset > 0 ? '+' : ''
-      bodyText += `## UTC ${operator}${timezone.utcOffset} | ${(timezone.people as string[]).join(',  ')}\n`
+      bodyText += `## UTC ${operator}${timezone.utcOffset} | ${(timezone.voters as string[]).join(',  ')}\n`
 
       maxAvailability.days = this.mergeTimes(maxAvailability.days).filter(day => day.times.length > 0)
       bodyText += "```ansi\n"
@@ -55,11 +55,23 @@ export class WebhookService {
     let currentDate = dayjs.unix(planning.startDate)
     const endDate   = dayjs.unix(planning.endDate)
     
-    const timezones = Object.entries(availabilities.reduce((a, { timezone, name }) => 
-      ((a[timezone] ||= [])
-      .push(name), a), {}))
-      .map(([tz, people]) => ({ utcOffset: currentDate.tz(tz).utcOffset() / 60, people }))
-      .sort((a, b) => a.utcOffset - b.utcOffset);
+    const timezones = availabilities.reduce((allTimezones: {utcOffset, voters}[], availability) => {
+      const utcOffset = currentDate.tz(availability.timezone).utcOffset() / 60
+      const offsetExists = allTimezones.map(offset => offset.utcOffset).indexOf(utcOffset)
+      
+      if (offsetExists !== -1) {
+        allTimezones[offsetExists].voters.push(availability.name)
+      }
+      else{
+        allTimezones.push({
+          utcOffset: utcOffset,
+          voters: [availability.name]
+        })
+      }
+
+      return allTimezones
+    }, [])
+    .sort((a, b) => a.utcOffset - b.utcOffset);
   
     while(currentDate.isBefore(endDate, 'day') || currentDate.isSame(endDate, 'day')){
       const currentDayTimes = times.filter(time=>currentDate.isSame(dayjs.unix(time.startTime), 'day'))
