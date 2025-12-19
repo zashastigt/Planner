@@ -19,13 +19,22 @@ export class WebhookService {
       const operator = timezone.utcOffset > 0 ? '+' : ''
       bodyText += `## UTC ${operator}${timezone.utcOffset} | ${(timezone.voters as string[]).join(',  ')}\n`
 
-      maxAvailability.days = this.mergeTimes(maxAvailability.days).filter(day => day.times.length > 0)
-      console.log(maxAvailability.days)
       bodyText += "```ansi\n"
+      let prefDateNumber;
       for(const day of maxAvailability.days){
         const utcDay = dayjs.unix(day.times[0].startTime).utcOffset(timezone.utcOffset)
 
-        bodyText += `\u001b[1;37m${utcDay.format('DD')} ${utcDay.format('ddd')}:\u001b[0;36m ${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(' \u001b[0;30m|\u001b[0;36m ')}\n`
+        const dateNumber = utcDay.format('DD')
+        const spacer = ` \u001b[0;30m|\u001b[0;36m `
+        if (dateNumber === prefDateNumber) {
+          bodyText += `${spacer}${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(spacer)}`
+        }
+        else {
+          bodyText += `\n`
+          bodyText += `\u001b[1;37m${dateNumber} ${utcDay.format('ddd')}:\u001b[0;36m ${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(spacer)}`
+        }
+
+        prefDateNumber = dateNumber;
       }
       bodyText += "```\n"
     }
@@ -52,8 +61,9 @@ export class WebhookService {
     const times = availabilities.flatMap(availability=>availability.times)
     const userAmount = availabilities.length
     
-    let currentDate = dayjs.unix(planning.startDate)
+    const startDate = dayjs.unix(planning.startDate)
     const endDate   = dayjs.unix(planning.endDate)
+    let currentDate = startDate
     
     const timezones = availabilities.reduce((allTimezones: {utcOffset, voters}[], availability) => {
       const utcOffset = currentDate.tz(availability.timezone).utcOffset() / 60
@@ -74,7 +84,8 @@ export class WebhookService {
     .sort((a, b) => a.utcOffset - b.utcOffset);
   
     while(currentDate.isBefore(endDate, 'day') || currentDate.isSame(endDate, 'day')){
-      const currentDayTimes = times.filter(time=>currentDate.isSame(dayjs.unix(time.startTime), 'day'))
+      const currentDayTimes = times.filter(time => currentDate.isSame(dayjs.unix(time.startTime), 'day') ||
+        currentDate.isSame(startDate, 'day') && currentDate.isSame(dayjs.unix(time.endTime), 'day'))
       const maxAvailabilityTimeBlocks: {
         startTime: number,
         endTime: number
@@ -122,27 +133,5 @@ export class WebhookService {
     const end = dayjs.unix(timeRange.endTime).utcOffset(utcOffset).format("HH:mm")
 
     return `${start} - ${end}`
-  }
-
-  mergeTimes(days: {times: {startTime: number; endTime: number; }[];}[]) {
-    let prevDayTimeSlot =  {
-      startTime: 0,
-      endTime: 0
-    } 
-
-    for(const day of days){
-      if(!day.times.length) continue;
-      day.times.sort((a, b) => a.startTime - b.startTime)
-
-      if (prevDayTimeSlot.endTime === day.times[0].startTime){
-        const prevDay = days[days.indexOf(day) - 1]
-        prevDay.times[prevDay.times.length - 1].endTime = day.times[0].endTime
-
-        day.times.splice(0, 1)
-      }
-
-      prevDayTimeSlot = day.times[day.times.length - 1]
-    }
-    return days;
   }
 }

@@ -20,7 +20,7 @@ export function cellsToTimeRanges(cells) {
         const localStartTime = dayjs.unix(startTime).utc()
         const localEndTime = dayjs.unix(endTime).utc()
         
-        if((!cell.selected && startTime && endTime) || (cell.selected && !localStartTime.isSame(localEndTime, 'day'))) {
+        if((!cell.selected && startTime && endTime)) {
             ranges.push({startTime, endTime})
             startTime = null;
             endTime = null;
