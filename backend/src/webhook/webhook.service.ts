@@ -20,6 +20,7 @@ export class WebhookService {
       bodyText += `## UTC ${operator}${timezone.utcOffset} | ${(timezone.voters as string[]).join(',  ')}\n`
 
       maxAvailability.days = this.mergeTimes(maxAvailability.days).filter(day => day.times.length > 0)
+      console.log(maxAvailability.days)
       bodyText += "```ansi\n"
       for(const day of maxAvailability.days){
         const utcDay = dayjs.unix(day.times[0].startTime).utcOffset(timezone.utcOffset)
@@ -51,7 +52,6 @@ export class WebhookService {
     const times = availabilities.flatMap(availability=>availability.times)
     const userAmount = availabilities.length
     
-
     let currentDate = dayjs.unix(planning.startDate)
     const endDate   = dayjs.unix(planning.endDate)
     
@@ -125,7 +125,7 @@ export class WebhookService {
   }
 
   mergeTimes(days: {times: {startTime: number; endTime: number; }[];}[]) {
-    let last =  {
+    let prevDayTimeSlot =  {
       startTime: 0,
       endTime: 0
     } 
@@ -134,14 +134,14 @@ export class WebhookService {
       if(!day.times.length) continue;
       day.times.sort((a, b) => a.startTime - b.startTime)
 
-      if (last && last.endTime == day.times[0].startTime){
-        day.times[0].startTime = last.startTime
-
+      if (prevDayTimeSlot.endTime === day.times[0].startTime){
         const prevDay = days[days.indexOf(day) - 1]
-        if (prevDay) prevDay.times.pop()
+        prevDay.times[prevDay.times.length - 1].endTime = day.times[0].endTime
+
+        day.times.splice(0, 1)
       }
 
-      last = day.times[day.times.length - 1]
+      prevDayTimeSlot = day.times[day.times.length - 1]
     }
     return days;
   }
