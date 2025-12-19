@@ -21,18 +21,14 @@ export class WebhookService {
 
       bodyText += "```ansi\n"
       let prefDateNumber;
+      let lastTime = "";
       for(const day of maxAvailability.days){
         const utcDay = dayjs.unix(day.times[0].startTime).utcOffset(timezone.utcOffset)
 
         const dateNumber = utcDay.format('DD')
         const spacer = ` \u001b[0;30m|\u001b[0;36m `
-        if (dateNumber === prefDateNumber) {
-          bodyText += `${spacer}${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(spacer)}`
-        }
-        else {
-          bodyText += `\n`
-          bodyText += `\u001b[1;37m${dateNumber} ${utcDay.format('ddd')}:\u001b[0;36m ${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(spacer)}`
-        }
+
+        bodyText = this.createBodyText(bodyText, timezone.utcOffset, day, utcDay, dateNumber, prefDateNumber, lastTime, spacer)
 
         prefDateNumber = dateNumber;
       }
@@ -126,6 +122,46 @@ export class WebhookService {
       timezones: timezones,
       days: days,
     }
+  }
+
+  createBodyText(
+    bodyText: string,
+    utcOffset: number,
+    day: {times: {
+        startTime: number;
+        endTime: number;
+    }[]},
+    utcDay: dayjs.Dayjs,
+    dateNumber: string,
+    prefDateNumber: string,
+    lastTime: string,
+    spacer: string) {
+    let dateDay = utcDay.format('ddd')
+
+    if (dateNumber === prefDateNumber) {
+      bodyText += `${spacer}${day.times.map(time=>this.getTimeRangeString(time, utcOffset)).join(spacer)}`
+    }
+    else if (dateNumber > prefDateNumber + 1) {
+      lastTime = bodyText.slice(-5)
+      bodyText = bodyText.slice(0, -5)
+
+      bodyText += `00:00`
+      for (let index = Number(prefDateNumber) + 1; index < Number(dateNumber); index++) { 
+        bodyText += `\n`
+        bodyText += `\u001b[1;37m${index} ${utcDay.format('ddd')}:\u001b[0;36m All day`
+        utcDay = utcDay.add(1, 'day')
+      }
+      bodyText += `\n`
+      lastTime = lastTime ? `00:00 - ${lastTime} | ` : lastTime
+      bodyText += `\u001b[1;37m${dateNumber} ${dateDay}:\u001b[0;36m ${lastTime}${day.times.map(time=>this.getTimeRangeString(time, utcOffset)).join(spacer)}`
+      lastTime = ""
+    }
+    else {
+      bodyText += `\n`
+      bodyText += `\u001b[1;37m${dateNumber} ${dateDay}:\u001b[0;36m ${day.times.map(time=>this.getTimeRangeString(time, utcOffset)).join(spacer)}`
+    }
+    
+    return bodyText
   }
 
   getTimeRangeString(timeRange: {startTime: number, endTime: number}, utcOffset: number){

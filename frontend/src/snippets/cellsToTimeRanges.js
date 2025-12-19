@@ -16,9 +16,6 @@ export function cellsToTimeRanges(cells) {
     _.forIn(cells, (cell)=>{
         if(cell.selected && !startTime) startTime = cell.startTime
         if(cell.selected && startTime) endTime = cell.endTime
-
-        const localStartTime = dayjs.unix(startTime).utc()
-        const localEndTime = dayjs.unix(endTime).utc()
         
         if((!cell.selected && startTime && endTime)) {
             ranges.push({startTime, endTime})
