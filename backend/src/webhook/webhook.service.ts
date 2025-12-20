@@ -23,7 +23,6 @@ export class WebhookService {
 
       bodyText += "```ansi\n"
       let prevDayNumber;
-      let prevDay
       let leftOverTime = "";
       for(const day of timezone.days) {
         const utcDayStart = dayjs.unix(day.times[0].startTime).utcOffset(timezone.utcOffset)
@@ -31,15 +30,12 @@ export class WebhookService {
 
         const dayLabel = utcDayStart.format('ddd')
         const dateNumber = utcDayStart.format('DD')
-
-        const endDateNumber = Number(utcDayEnd.format('DD'))
     
-        const {text, time} = this.createBodyText(bodyText, timezone.utcOffset, day, utcDayEnd, prevDay, dayLabel, Number(dateNumber), Number(prevDayNumber), leftOverTime, utcDayStart)
+        const {text, time} = this.createBodyText(bodyText, timezone.utcOffset, day, utcDayStart, utcDayEnd, dayLabel, Number(dateNumber), Number(prevDayNumber), leftOverTime)
         bodyText = text;
         leftOverTime = time
 
         prevDayNumber = dateNumber;
-        prevDay = utcDayStart;
       }
       bodyText += "```\n"
     }
@@ -162,13 +158,12 @@ export class WebhookService {
     bodyText: string,
     utcOffset: number,
     day: {times: { startTime: number; endTime: number; }[]},
+    utcDayStart: dayjs.Dayjs,
     utcDayEnd: dayjs.Dayjs,
-    prevDay: dayjs.Dayjs,
     dayLabel: string,
     dateNumber: number,
     prevDayNumber: number,
-    leftOverTime: string,
-    utcDayStart: dayjs.Dayjs) {
+    leftOverTime: string) {
 
     const timeRanges = day.times.map(time => this.getTimeRangeString(time, utcOffset))
     let sameDay = false;
