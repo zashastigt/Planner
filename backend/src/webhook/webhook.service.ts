@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import _ from 'lodash'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -15,32 +16,8 @@ export class WebhookService {
 
   sendWebhook(planning: Planning, availabilities: Availability[]) {
     const maxAvailability = this.getMaxAvailability(planning, availabilities)
-    let bodyText = ""
+    const bodyText = this.createBodyText(maxAvailability.timezones)
     
-    for (const timezone of maxAvailability.timezones) {
-      const operator = timezone.utcOffset > 0 ? '+' : ''
-      bodyText += `## UTC ${operator}${timezone.utcOffset} | ${(timezone.voters as string[]).join(',  ')}\n`
-
-      bodyText += "```ansi\n"
-      let prevDayNumber;
-      let leftOverTime = "";
-      for(const day of timezone.days) {
-        const utcDayStart = dayjs.unix(day.times[0].startTime).utcOffset(timezone.utcOffset)
-        const utcDayEnd = dayjs.unix(day.times[day.times.length -1].endTime).utcOffset(timezone.utcOffset)
-
-        const dayLabel = utcDayStart.format('ddd')
-        const dateNumber = utcDayStart.format('DD')
-    
-        const {text, time} = this.createBodyText(bodyText, timezone.utcOffset, day, utcDayStart, utcDayEnd, dayLabel, Number(dateNumber), Number(prevDayNumber), leftOverTime)
-        bodyText = text;
-        leftOverTime = time
-
-        prevDayNumber = dateNumber;
-      }
-      bodyText += "```\n"
-    }
-    if (timezone[0]?.days.length === 0) bodyText = "No availabilities";
-
     fetch(planning.webhook, {
       method: "PATCH",
       headers: {
@@ -74,18 +51,17 @@ export class WebhookService {
     return timezones
   }
 
-  getMaxAvailability(planning: Planning, availabilities: Availability[]) {
-    const days: {
-      times: {
-        startTime: number,
-        endTime: number
-      }[]
-    }[] = []
-
+  getMaxAvailability(planning: Planning, _availabilities: Availability[]) {
+    const availabilities = _.cloneDeep(_availabilities)
     const timezones: {
       utcOffset: number,
       voters: string[],
-      days: typeof days
+      days: {
+        times: {
+          startTime: number,
+          endTime: number
+        }[]
+      }[]
     }[] = []
 
     const times = availabilities.flatMap(availability=>availability.times)
@@ -93,45 +69,87 @@ export class WebhookService {
     
     const startDate = dayjs.unix(planning.startDate)
     const endDate   = dayjs.unix(planning.endDate)
-    let currentDate = startDate
     
     const sortedTimezones = this.getTimezones(availabilities)
     for (const timezone of sortedTimezones) {
-      currentDate = currentDate.utcOffset(timezone.utcOffset)
+      let currentDate = startDate.utcOffset(timezone.utcOffset)
+ 
+      const days: {
+        times: {
+          startTime: number,
+          endTime: number
+        }[]
+      }[] = []
+      let carryRange: {
+        startTime: number,
+        endTime: number
+      } | null = null
+console.log('------------')
       while (currentDate.isBefore(endDate, 'day') || currentDate.isSame(endDate, 'day')) {
-        const currentDayTimes = times.filter(time => currentDate.isSame(dayjs.unix(time.startTime).utcOffset(timezone.utcOffset), 'day') ||
-          currentDate.isSame(startDate, 'day') && currentDate.isSame(dayjs.unix(time.endTime).utcOffset(timezone.utcOffset), 'day'))
+        let currentDayTimes = times.filter(time => {
+          const startTime = dayjs.unix(time.startTime).utcOffset(timezone.utcOffset)
+          const endTime = dayjs.unix(time.endTime).utcOffset(timezone.utcOffset)
+          if (Number(currentDate.format('DD'))>= 26) console.log(`${currentDate.format('DD')}   ${currentDate.isSame(endTime, 'day')}`);
+          return currentDate.isSame(startTime, 'day') || (currentDate.isSame(endTime, 'day'))
+        }) 
+        
+        currentDayTimes = _.cloneDeep(currentDayTimes)
+        currentDayTimes = currentDayTimes.map(time => {
+          time.startTime = dayjs.unix(time.startTime).utcOffset(timezone.utcOffset).utcOffset(0, true).unix()
+          time.endTime = dayjs.unix(time.endTime).utcOffset(timezone.utcOffset).utcOffset(0, true).unix()
+          return time;
+        })
 
-        const maxAvailabilityTimeBlocks: {
+        if (carryRange) {
+          currentDayTimes.unshift(carryRange)
+          carryRange = null;
+        }
+
+        const maxAvailabilityRanges: {
           startTime: number,
           endTime: number
         }[] = []
 
         const processedTimes: number[] = []
-        for (const timeBlock of currentDayTimes) {
-          const startTime = timeBlock.startTime
+        for (const currentRange of currentDayTimes) {
+          const startTime = currentRange.startTime
 
           if (processedTimes.includes(startTime)) continue;
           processedTimes.push(startTime)
 
           let smallestEndTime = Number.POSITIVE_INFINITY
-          const matchingBlocks = currentDayTimes.filter((block) => {
-            const blockMatches = startTime >= block.startTime && startTime < block.endTime
-            if (blockMatches) smallestEndTime = Math.min(smallestEndTime, block.endTime)
-            return blockMatches
+          const matchingRanges = currentDayTimes.filter((range) => {
+            const withinRange = startTime >= range.startTime && startTime < range.endTime
+            if (withinRange) smallestEndTime = Math.min(smallestEndTime, range.endTime)
+            return withinRange
           })
+          //console.log(currentDayTimes)
+          //console.log(`${require('util').inspect(timezone, true, 10)}   ${require('util').inspect(matchingRanges, true, 10)}`)
+          if (matchingRanges.length < userAmount) continue;
 
-          if (matchingBlocks.length < userAmount) continue;
+          const endOfDay = dayjs.unix(startTime).endOf('day')
+          const startOfNewDay = endOfDay.add(1, 'day').startOf('day')
 
-          maxAvailabilityTimeBlocks.push({
+          if (dayjs.unix(smallestEndTime).isAfter(endOfDay)) {
+
+            carryRange = {
+              startTime: startOfNewDay.unix(),
+              endTime: smallestEndTime
+            }
+
+            smallestEndTime = endOfDay.unix()
+          }
+          const maxAvailabilityRange = {
             startTime: startTime,
             endTime: smallestEndTime
-          })
-        }
+          }
 
-        if(maxAvailabilityTimeBlocks.length) {
+          maxAvailabilityRanges.push(maxAvailabilityRange)
+        }
+        
+        if(maxAvailabilityRanges.length) {
           days.push({
-            times: maxAvailabilityTimeBlocks
+            times: maxAvailabilityRanges
           })
         }
         currentDate = currentDate.add(1, 'day')
@@ -154,59 +172,41 @@ export class WebhookService {
     SPACER: ` \u001b[0;30m|\u001b[0;36m `
   };
 
-  createBodyText(
-    bodyText: string,
-    utcOffset: number,
-    day: {times: { startTime: number; endTime: number; }[]},
-    utcDayStart: dayjs.Dayjs,
-    utcDayEnd: dayjs.Dayjs,
-    dayLabel: string,
-    dateNumber: number,
-    prevDayNumber: number,
-    leftOverTime: string) {
+  createBodyText(timezones) {
+    let bodyText = ''
 
-    const timeRanges = day.times.map(time => this.getTimeRangeString(time, utcOffset))
-    let sameDay = false;
+    for (const timezone of timezones) {
+      const operator = timezone.utcOffset > 0 ? '+' : ''
+      bodyText += `## UTC ${operator}${timezone.utcOffset} | ${(timezone.voters as string[]).join(',  ')}\n`
+      bodyText += "```ansi\n"
 
-    if (dateNumber === prevDayNumber) {
-      bodyText += `${this.ANSI.SPACER}${timeRanges.join(this.ANSI.SPACER)}`
-      sameDay = true;
-    }
-    else {
-      bodyText += `\n`
-      bodyText += `${this.formatDateHeader(dateNumber, dayLabel)} ${leftOverTime}${timeRanges.join(this.ANSI.SPACER)}`
-      leftOverTime = ""
-    }
+      for(const day of timezone.days) {
+        const timeRanges = day.times.map((time: { startTime: number; endTime: number; }) => this.getTimeRangeString(time))
+        const currentDay = dayjs.unix(day.times[0].startTime)
 
-    const endDateNumber = Number(utcDayEnd.format('DD'))
+        const dayLabel = currentDay.format('ddd')
+        const dayNumber = Number(currentDay.format('DD'))
 
-    const startsAtMidnightAndIntoNextDay = dayjs.unix(day.times[day.times.length - 1].startTime).isSame(utcDayStart.startOf('day')) && utcDayEnd.isSameOrAfter(utcDayStart.startOf('day').add(1, 'day'))
-    if (utcDayEnd.startOf('day').diff(utcDayStart.startOf('day'), 'day') > 1|| startsAtMidnightAndIntoNextDay) {
-      leftOverTime = `00:00 - ${bodyText.slice(-5)}${this.ANSI.SPACER}`
-      bodyText = bodyText.slice(0, -5) + `00:00`
-
-      if (dateNumber + 1 === endDateNumber || startsAtMidnightAndIntoNextDay) {
-        bodyText = bodyText.slice(0, -13) + `All day`
-      }
-
-      let currentDay = utcDayStart
-      for (let currentDateNumber = dateNumber + 1; currentDateNumber < endDateNumber; currentDateNumber++) {
         bodyText += `\n`
-        currentDay = currentDay.add(1, 'day')
-        bodyText += `${this.ANSI.BOLD_WHITE}${currentDateNumber} ${currentDay.format('ddd')}:${this.ANSI.CYAN} All day`
+        bodyText += `${this.formatDateHeader(dayLabel, dayNumber)} ${timeRanges.join(this.ANSI.SPACER)}`
       }
-    }
 
-    return {text: bodyText, time: leftOverTime}
+      bodyText += "```\n"
+    }
+    if (timezones[0]?.days.length === 0) bodyText = "No availabilities";
+    
+    return bodyText;
   }
 
-  formatDateHeader(dateNumber: number, dayLabel: string) {
+  formatDateHeader(dayLabel: string, dateNumber: number) {
     return `${this.ANSI.BOLD_WHITE}${dateNumber} ${dayLabel}:${this.ANSI.CYAN}`;
   }
 
-  getTimeRangeString(timeRange: {startTime: number, endTime: number}, utcOffset: number){
-    const start = dayjs.unix(timeRange.startTime).utcOffset(utcOffset).format("HH:mm")
-    const end = dayjs.unix(timeRange.endTime).utcOffset(utcOffset).format("HH:mm")
+  getTimeRangeString(timeRange: {startTime: number, endTime: number}){
+    const start = dayjs.unix(timeRange.startTime).format("HH:mm")
+    const end = dayjs.unix(timeRange.endTime).format("HH:mm")
+
+    if (start === "00:00" && end === "23:59") return `All day`;
 
     return `${start} - ${end}`
   }
