@@ -4,31 +4,21 @@ import { Planning } from 'src/planning/entities/planning.entity';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import _ from 'lodash'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.extend(isSameOrAfter)
 
 @Injectable()
 export class WebhookService {
 
   sendWebhook(planning: Planning, availabilities: Availability[]) {
-    const maxAvailability = this.getMaxAvailability(planning, availabilities)
-    let bodyText = ""
-
-    for (const timezone of maxAvailability.timezones) {
-      const operator = timezone.utcOffset > 0 ? '+' : ''
-      bodyText += `## UTC ${operator}${timezone.utcOffset} | ${(timezone.people as string[]).join(',  ')}\n`
-
-      maxAvailability.days = this.mergeTimes(maxAvailability.days).filter(day => day.times.length > 0)
-      bodyText += "```ansi\n"
-      for(const day of maxAvailability.days){
-        const utcDay = dayjs.unix(day.times[0].startTime).utcOffset(timezone.utcOffset)
-
-        bodyText += `\u001b[1;37m${utcDay.format('DD')} ${utcDay.format('ddd')}:\u001b[0;36m ${day.times.map(time=>this.getTimeRangeString(time, timezone.utcOffset)).join(' \u001b[0;30m|\u001b[0;36m ')}\n`
-      }
-      bodyText += "```\n"
-    }
-    if (maxAvailability.days.length === 0) bodyText = "No availabilities";
+    const allTimeRanges = this.getMaxAvailability(planning, availabilities)
+    const allTimeZones = this.getTimezones(availabilities)
+    const allTimezoneTimeRanges = this.getTimezoneTimes(allTimeRanges, allTimeZones)
+    const bodyText = this.createBodyText(planning, allTimezoneTimeRanges)
 
     fetch(planning.webhook, {
       method: "PATCH",
@@ -41,96 +31,187 @@ export class WebhookService {
     })
   }
 
+  getTimezones(availabilities: Availability[]) {
+    const timezones = availabilities.reduce((allTimezones: { timezone: string, utcOffset: number, voters: string[]}[], availability) => {
+      const utcOffset = dayjs().tz(availability.timezone).utcOffset() / 60
+      const offsetExists = allTimezones.map(offset => offset.utcOffset).indexOf(utcOffset)
+
+      if (offsetExists !== -1) {
+        allTimezones[offsetExists].voters.push(availability.name)
+      }
+      else {
+        allTimezones.push({
+          timezone: availability.timezone,
+          utcOffset: utcOffset,
+          voters: [availability.name]
+        })
+      }
+
+      return allTimezones
+    }, [])
+      .sort((a, b) => a.utcOffset - b.utcOffset);
+
+    return timezones
+  }
+
   getMaxAvailability(planning: Planning, availabilities: Availability[]) {
-    const days: {
+    let times = _.cloneDeep(availabilities.flatMap(availability => availability.times))
+    const userAmount = availabilities.length
+
+    const startDate = dayjs.unix(planning.startDate)
+    const endDate = dayjs.unix(planning.endDate)
+    let currentDate = startDate
+
+    const timeRanges: {
+      startTime: number,
+      endTime: number
+    }[] = []
+
+    const maxAvailabilityRanges: {
+      startTime: number,
+      endTime: number
+    }[] = []
+
+    const processedTimes: number[] = []
+    for (const currentRange of times) {
+      const startTime = currentRange.startTime
+
+      if (processedTimes.includes(startTime)) continue;
+      processedTimes.push(startTime)
+
+      let smallestEndTime = Number.POSITIVE_INFINITY
+      const matchingRanges = times.filter((range) => {
+        const withinRange = startTime >= range.startTime && startTime < range.endTime
+        if (withinRange) smallestEndTime = Math.min(smallestEndTime, range.endTime)
+        return withinRange
+      })
+
+      if (matchingRanges.length < userAmount) continue;
+
+      const maxAvailabilityRange = {
+        startTime: startTime,
+        endTime: smallestEndTime
+      }
+
+      maxAvailabilityRanges.push(maxAvailabilityRange)
+    }
+
+    if (maxAvailabilityRanges.length) {
+      timeRanges.push(...maxAvailabilityRanges)
+    }
+    currentDate = currentDate.add(1, 'day')
+
+    return {
+      timeRanges: timeRanges,
+    }
+  }
+
+  getTimezoneTimes(allTimeRanges, allTimeZones) {
+    const allTimezoneRanges: {
+      utcOffset: number,
+      voters: string[],
       times: {
         startTime: number,
         endTime: number
       }[]
     }[] = []
-    const times = availabilities.flatMap(availability=>availability.times)
-    const userAmount = availabilities.length
-    
 
-    let currentDate = dayjs.unix(planning.startDate)
-    const endDate   = dayjs.unix(planning.endDate)
-    
-    const timezones = Object.entries(availabilities.reduce((a, { timezone, name }) => 
-      ((a[timezone] ||= [])
-      .push(name), a), {}))
-      .map(([tz, people]) => ({ utcOffset: currentDate.tz(tz).utcOffset() / 60, people }))
-      .sort((a, b) => a.utcOffset - b.utcOffset);
-  
-    while(currentDate.isBefore(endDate, 'day') || currentDate.isSame(endDate, 'day')){
-      const currentDayTimes = times.filter(time=>currentDate.isSame(dayjs.unix(time.startTime), 'day'))
-      const maxAvailabilityTimeBlocks: {
-        startTime: number,
-        endTime: number
-      }[] = []
+    allTimeRanges.timeRanges.sort((a, b) => a.startTime - b.startTime)
 
-      const processedTimes: number[] = []
-      for(const timeBlock of currentDayTimes){
-        const startTime = timeBlock.startTime
-      
-        if(processedTimes.includes(startTime)) continue;
-        processedTimes.push(startTime)
-      
-        let smallestEndTime = Number.POSITIVE_INFINITY
-        const matchingBlocks = currentDayTimes.filter((block)=>{
-          const blockMatches = startTime >= block.startTime && startTime < block.endTime 
-          if(blockMatches) smallestEndTime = Math.min(smallestEndTime, block.endTime)
-          return blockMatches
-        })
-      
-        if(matchingBlocks.length < userAmount) continue;
-      
-        maxAvailabilityTimeBlocks.push({
-          startTime: startTime,
-          endTime: smallestEndTime
-        })
-      }
+    for (const timezone of allTimeZones) {
+      const times = _.cloneDeep(allTimeRanges).timeRanges.map(timeRange => {
+        timeRange.startTime = dayjs.unix(timeRange.startTime).tz(timezone.timezone).utcOffset(0, true).unix()
+        timeRange.endTime = dayjs.unix(timeRange.endTime).tz(timezone.timezone).utcOffset(0, true).unix()
 
-      if(maxAvailabilityTimeBlocks.length)
-        days.push({
-          times: maxAvailabilityTimeBlocks
-        })
-        
-      currentDate = currentDate.add(1, 'day')
+        return timeRange
+      })
+
+      allTimezoneRanges.push({
+        utcOffset: timezone.utcOffset,
+        voters: timezone.voters,
+        times: times
+      })
     }
 
-    return {
-      url: `${process.env.VITE_FRONTEND_URL}/${planning.id}`,
-      timezones: timezones,
-      days: days,
+    return allTimezoneRanges
+  }
+
+
+  readonly ANSI = {
+    BOLD_WHITE: '\u001b[1;37m',
+    CYAN: '\u001b[0;36m',
+    SPACER: ` \u001b[0;30m|\u001b[0;36m `
+  };
+
+  createBodyText(planning, allTimezoneTimeRanges) {
+    const startDate = dayjs.unix(planning.startDate)
+    const endDate = dayjs.unix(planning.endDate)
+    const startBodyText = `${startDate.format('ddd')} ${startDate.format('DD')} - ${endDate.format('ddd')} ${endDate.format('DD')}`
+    let bodyText = `${startBodyText}\n`
+
+    for (const timezoneRange of allTimezoneTimeRanges) {
+      const operator = timezoneRange.utcOffset > 0 ? '+' : ''
+      bodyText += `## UTC ${operator}${timezoneRange.utcOffset} | ${(timezoneRange.voters as string[]).join(',  ')}\n`
+      bodyText += "```ansi\n"
+
+      const timeRanges = timezoneRange.times.reduce((acc, timeRange) => [...acc, ...this.splitTimeRange(timeRange)], [])
+
+      let prevDayNumber = 0
+      for (const time of timeRanges) {
+        const currentDay = dayjs.unix(time.startTime)
+        const dayLabel = currentDay.format('ddd')
+        const dayNumber = Number(currentDay.format('DD'))
+
+        const isNewDay = prevDayNumber != dayNumber
+        if (isNewDay) {
+          bodyText += `\n${this.formatDateHeader(dayLabel, dayNumber)}`
+        }
+
+        bodyText += `${!isNewDay ? this.ANSI.SPACER : " "}${this.getTimeRangeString(time)}`
+
+        prevDayNumber = dayNumber
+      }
+
+      bodyText += "```\n"
+    }
+    if (allTimezoneTimeRanges[0].times.length === 0) bodyText = `${startBodyText}\nNo availabilities`;
+
+    return bodyText;
+  }
+
+  splitTimeRange(time: { startTime: number, endTime: number }) {
+    let start = dayjs.unix(time.startTime);
+    let end = dayjs.unix(time.endTime);
+    end = end.add(end.isSame(end.startOf('day')) ? -1 : 0 , 'second')
+
+    let carryRange: {
+      startTime: number,
+      endTime: number
+    } | null = null
+    
+    if (!start.isSame(end, 'day')) {
+      carryRange = {
+        startTime: start.startOf('day').add(1, 'day').unix(),
+        endTime: end.unix()
+      }
+
+      return [{startTime: time.startTime, endTime: carryRange.startTime - 1}, ...this.splitTimeRange(carryRange)]
+    }
+    else {
+      return [{startTime: start.unix(), endTime: end.unix()}]
     }
   }
 
-  getTimeRangeString(timeRange: {startTime: number, endTime: number}, utcOffset: number){
-    const start = dayjs.unix(timeRange.startTime).utcOffset(utcOffset).format("HH:mm")
-    const end = dayjs.unix(timeRange.endTime).utcOffset(utcOffset).format("HH:mm")
+  formatDateHeader(dayLabel: string, dateNumber: number) {
+    return `${this.ANSI.BOLD_WHITE}${dateNumber} ${dayLabel}:${this.ANSI.CYAN}`;
+  }
+
+  getTimeRangeString(timeRange: { startTime: number, endTime: number }) {
+    const start = dayjs.unix(timeRange.startTime).format("HH:mm")
+    const end = dayjs.unix(timeRange.endTime).format("HH:mm")
+
+    if (start === "00:00" && end === "23:59") return `All day`;
 
     return `${start} - ${end}`
-  }
-
-  mergeTimes(days: {times: {startTime: number; endTime: number; }[];}[]) {
-    let last =  {
-      startTime: 0,
-      endTime: 0
-    } 
-
-    for(const day of days){
-      if(!day.times.length) continue;
-      day.times.sort((a, b) => a.startTime - b.startTime)
-
-      if (last && last.endTime == day.times[0].startTime){
-        day.times[0].startTime = last.startTime
-
-        const prevDay = days[days.indexOf(day) - 1]
-        if (prevDay) prevDay.times.pop()
-      }
-
-      last = day.times[day.times.length - 1]
-    }
-    return days;
   }
 }
