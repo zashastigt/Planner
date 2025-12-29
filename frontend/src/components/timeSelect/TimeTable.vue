@@ -22,7 +22,7 @@
 
     
     const startDate = dayjs.unix(props.startDate).startOf('day')
-    const endDate   = dayjs.unix(props.endDate).startOf('day')
+    const endDate   = dayjs.unix(props.endDate).add(1, 'day').startOf('day')
     const cells = ref({})
     const editable = computed(()=>getCurrentInstance()?.vnode.props.onEdited)
 

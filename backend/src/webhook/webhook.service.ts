@@ -156,13 +156,13 @@ export class WebhookService {
 
       const timeRanges = timezoneRange.times.reduce((acc, timeRange) => [...acc, ...this.splitTimeRange(timeRange)], [])
 
-      let prevDayNumber = 0
+      let prevDayNumber = ""
       for (const time of timeRanges) {
         const currentDay = dayjs.unix(time.startTime)
         const dayLabel = currentDay.format('ddd')
-        const dayNumber = Number(currentDay.format('DD'))
+        const dayNumber = currentDay.format('DD')
 
-        const isNewDay = prevDayNumber != dayNumber
+        const isNewDay = prevDayNumber !== dayNumber
         if (isNewDay) {
           bodyText += `\n${this.formatDateHeader(dayLabel, dayNumber)}`
         }
@@ -202,7 +202,7 @@ export class WebhookService {
     }
   }
 
-  formatDateHeader(dayLabel: string, dateNumber: number) {
+  formatDateHeader(dayLabel: string, dateNumber: string) {
     return `${this.ANSI.BOLD_WHITE}${dateNumber} ${dayLabel}:${this.ANSI.CYAN}`;
   }
 
