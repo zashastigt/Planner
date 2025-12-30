@@ -37,7 +37,8 @@
         cells.value[currentDate.unix()] = {
             startTime: currentDate.unix(),
             endTime: newDate.unix(),
-            selected: false
+            selected: false,
+            names: []
         }
         currentDate = newDate 
     }
@@ -122,6 +123,10 @@
         time = String(time)
         return [time.slice(0, -2), time.slice(-2)]
     }
+
+    function onMouseOverAvailabilities(cell) {
+        console.log(cell.names)
+    }
 </script>
 
 <template>
@@ -143,6 +148,7 @@
                 @[editable&&'mouseDown']="cell=>onMouseDown(cell)"
                 @[editable&&'mouseOver']="cell=>onMouseOver(cell)"
                 @[editable&&'mouseUp']="cell=>onMouseUp(cell)"
+                @[!editable&&'mouseOver']="onMouseOverAvailabilities(cell)"
             />
         </div>
     </section>
