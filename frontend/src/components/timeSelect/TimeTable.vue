@@ -3,9 +3,9 @@
     import minmax from 'dayjs/plugin/minMax'
     import _ from 'lodash'
     import TimeCell from './TimeCell.vue'
-    import {ref, watch, onBeforeMount, computed, getCurrentInstance} from 'vue'
+    import {ref, watch, onBeforeMount, computed, getCurrentInstance, useTemplateRef} from 'vue'
     import isBetween from 'dayjs/plugin/isBetween'
-
+    
     dayjs.extend(minmax)
     dayjs.extend(isBetween)
 
@@ -112,6 +112,7 @@
     }
 
     function onMouseUp(){
+        currentNames.value = []
         if(!firstCell) return;
         firstCell = null
         cells.value = temporaryCells.value
@@ -124,8 +125,16 @@
         return [time.slice(0, -2), time.slice(-2)]
     }
 
-    function onMouseOverAvailabilities(cell) {
-        console.log(cell.names)
+    const showGradient = false
+
+    const currentNames = ref([])
+    const namesPopup = useTemplateRef("namesPopup")
+    function showNamesSelected(cellData, cellComponent) {
+        currentNames.value = showGradient ? cellData.names : (cellData.selected ? cellData.names : [])
+        const namesPopupElement = namesPopup.value
+        const {x: cellX, y: cellY, width: cellWidth, height: cellHeight} = cellComponent.getBoundingClientRect()
+        namesPopupElement.style.left = `${cellX + cellWidth }px`
+        namesPopupElement.style.top = `${cellY + cellHeight/2}px`
     }
 </script>
 
@@ -145,12 +154,16 @@
                 :startTime="cell.startTime"
                 :endTime="cell.endTime"
                 :selected="cell.selected"
+                :names="cell.names"
                 @[editable&&'mouseDown']="cell=>onMouseDown(cell)"
                 @[editable&&'mouseOver']="cell=>onMouseOver(cell)"
                 @[editable&&'mouseUp']="cell=>onMouseUp(cell)"
-                @[!editable&&'mouseOver']="onMouseOverAvailabilities(cell)"
+                @[!editable&&'mouseOver']="(_, cellComponent)=>showNamesSelected(cell, cellComponent)"
             />
         </div>
+        <dialog class="namesPopup" ref="namesPopup" v-show="!editable && (showGradient ? true : currentNames.length)">
+            <span class="name" v-for="name in currentNames">{{name}}<br></span>
+        </dialog>
     </section>
 </template>
 
@@ -207,5 +220,46 @@
             grid-row: v-bind('`2/${hours.length*4+2}`');
             border-left: 1px solid white;
         }
+
+        .namesPopup{
+            --names-popup-color: hsl(from var(--planner-color) h s calc(l * .7));
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            translate: 5px -50%;
+            margin: 0;
+            pointer-events: none;
+            font-size: 13px;
+            border: none;
+            padding: 10px;
+            background: var(--names-popup-color);
+            border: 1px solid white;
+            border-radius: 5px;
+            z-index: 99;
+            transition: .1s;
+
+            &::after,&::before {
+                position: absolute;
+                top: 50%;
+                right: 100%;
+                border: solid transparent;
+                content: "";
+                height: 0;
+                width: 0;
+                pointer-events: none;
+            }
+            &::before{
+                border-right-color: white;
+                border-width: 6px;
+                margin-top: -6px;
+            }
+            &::after{
+                border-right-color: var(--names-popup-color);
+                border-width: 5px;
+                margin-top: -5px;
+            }
+        }
+
     }
 </style>

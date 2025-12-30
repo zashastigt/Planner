@@ -1,5 +1,5 @@
 <script setup>
-    import { computed, getCurrentInstance, ref } from 'vue';
+    import { computed, getCurrentInstance, ref, useTemplateRef } from 'vue';
 
     const props = defineProps([
         "startTime",
@@ -12,29 +12,27 @@
         "mouseOver",
         "mouseUp"
     ])
-    const selecting = ref(false)
+
     const editable = computed(()=>{
         return getCurrentInstance()?.vnode.props.onMouseDown
             && getCurrentInstance()?.vnode.props.onMouseOver
             && getCurrentInstance()?.vnode.props.onMouseUp
     });
 
+    const cellComponent = useTemplateRef('cell')
 
 </script>
 <template>
     <div 
+        ref="cell"
         :class="`
             timeCell
             ${props.selected ? ' selected' : ''}
             ${editable ? ' editable' : ''}
-            ${selecting ? ' selecting' : ''}
         `"
         @mousedown="()=>emit('mouseDown', {startTime, endTime, selected})"
-        @mouseover="(e)=>{
-            selecting = e.buttons === 1
-            emit('mouseOver', {startTime, endTime, selected})
-        }"
-        @mouseup = "()=>emit('mouseUp', {startTime, endTime, selected})"
+        @mouseover="()=>emit('mouseOver', {startTime, endTime, selected}, cellComponent)"
+        @mouseup="()=>emit('mouseUp', {startTime, endTime, selected})"
     >
     </div>
 </template>
@@ -53,10 +51,8 @@
         &.selected{
             background-color: var(--planner-color);
         }
-        &.editable:not(.selecting){
-            &:hover{
-                background-color: var(--planner-color--hover);
-            }
+        &:hover{
+            background-color: var(--planner-color--hover);
         }
     }
 </style>
