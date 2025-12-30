@@ -44,9 +44,24 @@
         let cells = {}
         for(const person of availabilities){
             const personCells = timeRangesToCells(person.times, 15)
-            if(!_.size(cells)) cells = personCells
-            else cells = _.pick(cells, _.intersection(Object.keys(cells), Object.keys(personCells)))
+
+            for (const cell in personCells) {
+                if(!cells[cell]) {
+                    cells[cell] = {
+                        startTime: personCells[cell].startTime,
+                        endTime: personCells[cell].endTime,
+                        names: []
+                    }
+
+                }
+                cells[cell].names.push(person.name);
+            }
         }
+        
+        for (const cell in cells) {
+            cells[cell].selected = cells[cell].names.length === availabilities.length
+        }
+
         return cells
     }
 
