@@ -91,7 +91,7 @@
         }
         &.editable:not(.selecting){
             &.not-selected:hover{
-                background-color: hsl(from var(--planner-gradient-color) h s l / .5);
+                background-color: hsl(from var(--planner-color) h s l / .5);
             }
         }
     }
