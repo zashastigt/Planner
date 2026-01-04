@@ -41,7 +41,10 @@
             selecting = e.buttons === 1
             emit('mouseOver', {startTime, endTime, selected}, cellComponent)
         }"
-        @mouseup="()=>emit('mouseUp', {startTime, endTime, selected})"
+        @mouseup="()=>{
+            selecting = false
+            emit('mouseUp', {startTime, endTime, selected})
+        }"
     >
     </div>
 </template>
