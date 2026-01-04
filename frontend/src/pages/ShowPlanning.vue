@@ -2,14 +2,13 @@
     import Card from '../components/Card.vue'
     import InputName from '../components/InputName.vue';
     import { onBeforeMount, ref} from 'vue';
-    import ColorPicker from '../components/ColorPicker.vue';
     import TimeTable from '../components/timeSelect/TimeTable.vue'
     import NotAvailableButton from '../components/NotAvailableButton.vue';
     import _ from 'lodash'
     import { getAvailability, getPlanning, sendAvailability, urlId} from '../snippets/fetchCalls';
     import { timeRangesToCells } from '../snippets/cellsToTimeRanges';
     import { watch } from 'vue';
-import Settings from '../components/Settings.vue';
+    import Settings from '../components/Settings.vue';
 
     defineProps({
         planningId: Number
