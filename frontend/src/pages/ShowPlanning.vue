@@ -9,6 +9,7 @@
     import { getAvailability, getPlanning, sendAvailability, urlId} from '../snippets/fetchCalls';
     import { timeRangesToCells } from '../snippets/cellsToTimeRanges';
     import { watch } from 'vue';
+import Settings from '../components/Settings.vue';
 
     defineProps({
         planningId: Number
@@ -83,14 +84,13 @@
                 <InputName nameCheck="nameCheck" @updateNameCheck="_name=>name=_name" />
             </Card>
             <Card v-if="planning && name && personCells !== null" title="Your availability">
-                <TimeTable 
+                <TimeTable
                     :startDate="planning.startDate" 
                     :endDate="planning.endDate" 
                     :timeInterval="15"
                     :cells="personCells"
                     @edited="saveSelection"
                 />
-                
             </Card>
         </section>
         <section class="side right">
@@ -102,7 +102,7 @@
                     :cells="maxAvailabilityCells"
                 />
             </Card>
-            <ColorPicker />
+            <Settings/>
         </section>
     </section>
 </template>

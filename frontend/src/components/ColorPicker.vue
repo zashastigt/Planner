@@ -1,22 +1,25 @@
 <script setup>
 import { ChromePicker } from 'vue-color'
-import { useColorStore } from '../store/store'
-import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref, watch } from 'vue'
 
-const colorStore = useColorStore()
-const { color } = storeToRefs(colorStore)
+const props = defineProps([
+    "defaultColor"
+])
 
-const showPicker = ref(false)
+const color = ref(props.defaultColor)
+const emit = defineEmits([
+    "change",
+    "close"
+])
+
+watch(color, ()=>emit("change", color.value))
+
 </script>
 
 <template>
-    <div class="colorMenu button" v-if="!showPicker">
-            <img class="image" src="../assets/color-wheel.png" @click="() => showPicker = !showPicker" />
-    </div>
-    <div class="colorMenu picker" v-if="showPicker">
-        <div class="title" @click="() => showPicker = !showPicker">
-            <div>< Change cell color</div> 
+    <div class="colorMenu picker">
+        <div class="title" @click="()=>emit('close')">
+            <div>< <slot/></div> 
         </div>
         <ChromePicker v-model="color" />
     </div>
@@ -24,7 +27,6 @@ const showPicker = ref(false)
 
 <style scoped>
     .colorMenu {
-        margin-top: 25px;
         background-color: var(--dark-gray);
         color: var(--black);
         border: 1px solid var(--light-gray);
