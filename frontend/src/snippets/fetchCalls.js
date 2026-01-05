@@ -32,8 +32,8 @@ export async function createPlanning(date, webhook="") {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            startDate: dayjs(date.start).unix(),
-            endDate: dayjs(date.end).unix(),
+            startDate: dayjs(date.start).hour(12).minute(0).second(0).unix(),
+            endDate: dayjs(date.end).hour(12).minute(0).second(0).unix(),
             webhook: webhook
         })
     });
