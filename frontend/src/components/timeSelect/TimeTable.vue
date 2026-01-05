@@ -247,6 +247,12 @@
             z-index: 99;
             transition: .1s;
 
+            display: grid;
+                grid-template-rows: repeat(5, max-content);
+                grid-auto-flow: column;
+                gap: 0 5px;
+                text-align: left;
+
             &::after,&::before {
                 position: absolute;
                 top: 50%;
