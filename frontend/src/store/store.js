@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 
-export const useColorStore = defineStore('color', () => {
+export const useSettingsStore = defineStore('settings', () => {
     const color = ref(
         localStorage.getItem("tableColor")
             ? localStorage.getItem("tableColor")
@@ -11,5 +11,23 @@ export const useColorStore = defineStore('color', () => {
         localStorage.setItem("tableColor", color.value)
     })
 
-    return { color }
+    const gradient = ref(
+        localStorage.getItem("gradientColor")
+            ? localStorage.getItem("gradientColor")
+            : color.value)
+
+    watch(gradient, () => {
+        localStorage.setItem("gradientColor", gradient.value)
+    })
+
+    const showGradient = ref(
+        localStorage.getItem("showGradient")
+            ? localStorage.getItem("showGradient") === "true"
+            : false)
+
+    watch(showGradient, () => {
+        localStorage.setItem("showGradient", showGradient.value)
+    })
+
+    return { color, gradient, showGradient }
 })

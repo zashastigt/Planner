@@ -5,6 +5,8 @@
     import TimeCell from './TimeCell.vue'
     import {ref, watch, onBeforeMount, computed, getCurrentInstance, useTemplateRef} from 'vue'
     import isBetween from 'dayjs/plugin/isBetween'
+    import { useSettingsStore } from '../../store/store'
+    import { storeToRefs } from 'pinia'
     
     dayjs.extend(minmax)
     dayjs.extend(isBetween)
@@ -20,12 +22,14 @@
         "edited",
     ])
 
+    const settingsStore = useSettingsStore()
     
     const startDate = dayjs.unix(props.startDate).startOf('day')
     const endDate   = dayjs.unix(props.endDate).add(1, 'day').startOf('day')
-    const cells = ref({})
-    const editable = computed(()=>getCurrentInstance()?.vnode.props.onEdited)
-
+    const cells     = ref({})
+    const editable  = computed(()=>getCurrentInstance()?.vnode.props.onEdited)
+    const maxNames  = computed(()=>_.reduce(props.cells, (acc, cell)=>Math.max(cell.names?.length, acc), 0))
+    
     const hours = []
     let currentDate = startDate
     while(currentDate.diff(endDate) < 0){
@@ -125,17 +129,20 @@
         return [time.slice(0, -2), time.slice(-2)]
     }
 
-    const showGradient = false
+    const {showGradient} = storeToRefs(settingsStore)
 
     const currentNames = ref([])
     const namesPopup = useTemplateRef("namesPopup")
     function showNamesSelected(cellData, cellComponent) {
-        currentNames.value = showGradient ? cellData.names : (cellData.selected ? cellData.names : [])
+        currentNames.value = showGradient.value ? cellData.names : (cellData.selected ? cellData.names : [])
         const namesPopupElement = namesPopup.value
+        const backgroundColor = getComputedStyle(cellComponent).getPropertyValue('background-color')
         const {x: cellX, y: cellY, width: cellWidth, height: cellHeight} = cellComponent.getBoundingClientRect()
         namesPopupElement.style.left = `${cellX + cellWidth }px`
         namesPopupElement.style.top = `${cellY + cellHeight/2}px`
+        namesPopupElement.style.setProperty("--names-popup-color", `linear-gradient(${backgroundColor}, ${backgroundColor}), var(--dark-gray)`)
     }
+
 </script>
 
 <template>
@@ -161,7 +168,7 @@
                 @[!editable&&'mouseOver']="(_, cellComponent)=>showNamesSelected(cell, cellComponent)"
             />
         </div>
-        <dialog class="namesPopup" ref="namesPopup" v-show="!editable && (showGradient ? true : currentNames.length)">
+        <dialog class="namesPopup" ref="namesPopup" v-show="!editable && currentNames.length">
             <span class="name" v-for="name in currentNames">{{name}}<br></span>
         </dialog>
     </section>
@@ -169,6 +176,7 @@
 
 <style scoped>
     .timeTable{
+        --max-names: v-bind('maxNames');
         display: grid;
         grid-auto-flow: column;
         grid-template-columns:  v-bind('`repeat(${days.length+1}, max-content)`');
@@ -239,6 +247,12 @@
             z-index: 99;
             transition: .1s;
 
+            display: grid;
+                grid-template-rows: repeat(5, max-content);
+                grid-auto-flow: column;
+                gap: 0 5px;
+                text-align: left;
+
             &::after,&::before {
                 position: absolute;
                 top: 50%;
@@ -254,12 +268,6 @@
                 border-width: 6px;
                 margin-top: -6px;
             }
-            &::after{
-                border-right-color: var(--names-popup-color);
-                border-width: 5px;
-                margin-top: -5px;
-            }
         }
-
     }
 </style>
