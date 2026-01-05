@@ -36,7 +36,10 @@
             ${editable ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
-        @mousedown="()=>emit('mouseDown', {startTime, endTime, selected})"
+        @mousedown="()=>{
+            selecting = true
+            emit('mouseDown', {startTime, endTime, selected})
+        }"
         @mouseover="(e)=>{
             selecting = e.buttons === 1
             emit('mouseOver', {startTime, endTime, selected}, cellComponent)
