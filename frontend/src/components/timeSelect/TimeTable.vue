@@ -54,7 +54,7 @@
     onBeforeMount(()=>cells.value = mergeCells(emptyCells, props.cells))
 
     function mergeCells(mainCells, selectedCells) {
-        selectedCells = _.pickBy(selectedCells, (cell) => dayjs.unix(cell.startTime).isBetween(startDate, endDate, 'hour', []))
+        selectedCells = _.pickBy(selectedCells, (cell) => dayjs.unix(cell.startTime).isBetween(startDate, endDate, 'hour', '[)'))
         return _.merge(_.cloneDeep(mainCells), selectedCells)
     }
 
