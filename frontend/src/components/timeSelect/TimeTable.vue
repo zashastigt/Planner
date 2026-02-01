@@ -15,7 +15,8 @@
         "startDate",
         "endDate",
         "timeInterval",
-        "cells"
+        "cells",
+        "allPersons"
     ])
 
     const emit = defineEmits([
@@ -129,15 +130,19 @@
         return [time.slice(0, -2), time.slice(-2)]
     }
 
-    const {showGradient} = storeToRefs(settingsStore)
+    const {showGradient, showUnavailable} = storeToRefs(settingsStore)
 
     const currentNames = ref([])
     const namesPopup = useTemplateRef("namesPopup")
     function showNamesSelected(cellData, cellComponent) {
-        currentNames.value = showGradient.value ? cellData.names : (cellData.selected ? cellData.names : [])
+        let names = cellData.names
+        if (showUnavailable.value) names = cellData.names.length ? [...props.allPersons].map((name, i) => {return cellData.names.includes(name) ? name : `<s>${name}</s>`}) : []
+        currentNames.value = showGradient.value ? names : (cellData.selected ? names : [])
+
         const namesPopupElement = namesPopup.value
         const backgroundColor = getComputedStyle(cellComponent).getPropertyValue('background-color')
         const {x: cellX, y: cellY, width: cellWidth, height: cellHeight} = cellComponent.getBoundingClientRect()
+        
         namesPopupElement.style.left = `${cellX + cellWidth }px`
         namesPopupElement.style.top = `${cellY + cellHeight/2}px`
         namesPopupElement.style.setProperty("--names-popup-color", `linear-gradient(${backgroundColor}, ${backgroundColor}), var(--dark-gray)`)
@@ -169,7 +174,7 @@
             />
         </div>
         <dialog class="namesPopup" ref="namesPopup" v-show="!editable && currentNames.length">
-            <span class="name" v-for="name in currentNames">{{name}}<br></span>
+            <span class="name" v-for="name in currentNames" v-html="name"></span>
         </dialog>
     </section>
 </template>

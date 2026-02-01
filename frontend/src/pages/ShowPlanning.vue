@@ -19,6 +19,7 @@
     const availability = ref(null)
     const personCells = ref({})
     const maxAvailabilityCells = ref(null)
+    const allPersonNames = new Set()
 
     onBeforeMount(()=>{
         getPlanning().then(res=>planning.value = res);
@@ -43,6 +44,7 @@
     function availabilitiesToMaxAvailability(availabilities){
         let cells = {}
         for(const person of availabilities){
+            allPersonNames.add(person.name)
             const personCells = timeRangesToCells(person.times, 15)
 
             for (const cell in personCells) {
@@ -99,6 +101,7 @@
                     :endDate="planning.endDate" 
                     :timeInterval="15" 
                     :cells="maxAvailabilityCells"
+                    :allPersons="allPersonNames"
                 />
             </Card>
             <Settings/>
