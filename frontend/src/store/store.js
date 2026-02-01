@@ -29,5 +29,14 @@ export const useSettingsStore = defineStore('settings', () => {
         localStorage.setItem("showGradient", showGradient.value)
     })
 
-    return { color, gradient, showGradient }
+    const showUnavailable = ref(
+        localStorage.getItem("showUnavailable")
+            ? localStorage.getItem("showUnavailable") === "true"
+            : false)
+
+    watch(showUnavailable, () => {
+        localStorage.setItem("showUnavailable", showUnavailable.value)
+    })
+
+    return { color, gradient, showGradient, showUnavailable }
 })

@@ -4,14 +4,15 @@
     import { useSettingsStore } from '../store/store'
     import { storeToRefs } from 'pinia'
 
-    const optionsOpen               = ref(false)
-    const showCellColorOption       = ref(false)
-    const showGradientColorOption   = ref(false)
-    const optionsModalOpen          = computed(()=>showCellColorOption.value || showGradientColorOption.value)
-    const settingsStore             = useSettingsStore()
-    const {showGradient}            = storeToRefs(settingsStore)
+    const optionsOpen                       = ref(false)
+    const showCellColorOption               = ref(false)
+    const showGradientColorOption           = ref(false)
+    const optionsModalOpen                  = computed(()=>showCellColorOption.value || showGradientColorOption.value)
+    const settingsStore                     = useSettingsStore()
+    const {showGradient, showUnavailable}   = storeToRefs(settingsStore)
 
     watch(showGradient, ()=>settingsStore.showGradient = showGradient.value)
+    watch(showUnavailable, ()=>settingsStore.showUnavailable = showUnavailable.value)
 
 </script>
 <template>
@@ -31,6 +32,10 @@
                 <span>Show gradient</span>
             </label>
             <button v-if="showGradient" @click="showGradientColorOption = !showGradientColorOption">Change gradient color</button>
+            <label>
+                <input v-model="showUnavailable" type="checkbox">
+                <span>Show unavailable</span>
+            </label>
         </div>
 
         <div class="optionModal" v-if="optionsModalOpen">

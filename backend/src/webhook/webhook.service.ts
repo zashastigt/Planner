@@ -146,7 +146,7 @@ export class WebhookService {
   createBodyText(planning, allTimezoneTimeRanges) {
     const startDate = dayjs.unix(planning.startDate)
     const endDate = dayjs.unix(planning.endDate)
-    const startBodyText = `${startDate.format('ddd')} ${startDate.format('DD')} - ${endDate.format('ddd')} ${endDate.format('DD')}`
+    const startBodyText = `### ${startDate.format('ddd')} ${startDate.format('DD')} - ${endDate.format('ddd')} ${endDate.format('DD')}`
     let bodyText = `${startBodyText}\n`
 
     for (const timezoneRange of allTimezoneTimeRanges) {
@@ -174,7 +174,11 @@ export class WebhookService {
 
       bodyText += "```\n"
     }
-    if (allTimezoneTimeRanges[0].times.length === 0) bodyText = `${startBodyText}\nNo availabilities`;
+    if (allTimezoneTimeRanges[0].times.length === 0) {
+      const voters = allTimezoneTimeRanges.map((timezoneRange) =>{return timezoneRange.voters.join(', ') })
+      const noOverlap = `### Unavailable`
+      bodyText = `${startBodyText}\nVoters: ${voters}\n${noOverlap}`;
+    }
 
     return bodyText;
   }
