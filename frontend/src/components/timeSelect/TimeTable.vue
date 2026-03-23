@@ -1,6 +1,7 @@
 <script setup>
     import dayjs from 'dayjs'
     import minmax from 'dayjs/plugin/minMax'
+    import utc from 'dayjs/plugin/utc'
     import _ from 'lodash'
     import TimeCell from './TimeCell.vue'
     import {ref, watch, onBeforeMount, computed, getCurrentInstance, useTemplateRef} from 'vue'
@@ -10,6 +11,7 @@
     
     dayjs.extend(minmax)
     dayjs.extend(isBetween)
+    dayjs.extend(utc)
 
     const props = defineProps([
         "startDate",
@@ -32,6 +34,7 @@
     const maxNames  = computed(()=>_.reduce(props.cells, (acc, cell)=>Math.max(cell.names?.length, acc), 0))
     
     const hours = []
+    const hourInMinutes = 60
     let currentDate = startDate
     while(currentDate.diff(endDate) < 0){
         
@@ -39,12 +42,28 @@
         if(!hours.includes(hour)) hours.push(hour)
 
         const newDate = currentDate.add(props.timeInterval, "minute")
-        cells.value[currentDate.unix()] = {
-            startTime: currentDate.unix(),
+        
+        const currentUnix = currentDate.unix()
+        const baseCell = {
+            startTime: currentUnix,
             endTime: newDate.unix(),
             selected: false,
-            names: []
+            names: [],
+            dst: false
         }
+        
+        if (currentDate.utcOffset() !== newDate.utcOffset())
+        {
+            for (let index = 1; index <= (hourInMinutes / props.timeInterval); index++) {
+                cells.value[currentUnix + index] = {
+                    ...baseCell,
+                    dst: true
+                }
+            }
+        }
+        
+        cells.value[currentUnix] = baseCell
+
         currentDate = newDate 
     }
     const emptyCells = cells.value
@@ -110,7 +129,9 @@
             const selected = !(isBeforeSelection || isAfterSelection)
 
             if(!selected) cell = undefined
-            else cell.selected = firstCell.selected
+            else {
+                if(!cell.dst) cell.selected = firstCell.selected
+            }
         })
 
         temporaryCells.value = _.merge(_.cloneDeep(cells.value), _.pickBy(temporaryCells.value, cell=>cell.selected == firstCell.selected))
@@ -167,6 +188,7 @@
                 :endTime="cell.endTime"
                 :selected="cell.selected"
                 :names="cell.names"
+                :dst="cell.dst"
                 @[editable&&'mouseDown']="cell=>onMouseDown(cell)"
                 @[editable&&'mouseOver']="cell=>onMouseOver(cell)"
                 @[editable&&'mouseUp']="cell=>onMouseUp(cell)"

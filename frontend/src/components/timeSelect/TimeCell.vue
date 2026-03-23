@@ -7,7 +7,8 @@
         "startTime",
         "endTime",
         "selected",
-        "names"
+        "names",
+        "dst"
     ])
     
     const emit = defineEmits([
@@ -32,19 +33,22 @@
         ref="cell"
         :class="`
             timeCell
-            ${props.selected ? ' selected' : (showGradient && props.names.length ? ' partially-selected': ' not-selected')}
+            ${props.dst ? ' dst' : props.selected ? ' selected' : (showGradient && props.names.length ? ' partially-selected': ' not-selected')}
             ${editable ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
         @mousedown="()=>{
+            if(props.dst) return
             selecting = true
             emit('mouseDown', {startTime, endTime, selected})
         }"
         @mouseover="(e)=>{
+            if(props.dst) return
             selecting = e.buttons === 1
             emit('mouseOver', {startTime, endTime, selected}, cellComponent)
         }"
         @mouseup="()=>{
+            if(props.dst) return
             selecting = false
             emit('mouseUp', {startTime, endTime, selected})
         }"
@@ -96,6 +100,10 @@
             &.not-selected:hover{
                 background-color: hsl(from var(--planner-color) h s l / .5);
             }
+        }
+        &.dst{
+            pointer-events: none;
+            background-color: white;
         }
     }
 </style>
