@@ -131,4 +131,24 @@
             }
         }
     }
+
+    @media (max-width: 600px) {
+        .availability {
+            flex-direction: column;
+            height: auto;
+            
+
+            .side {
+                width: 100%;
+                margin: 2% 0;
+                &.left {
+                    justify-content: center;
+                }
+                &.right {
+                    justify-content: center;
+                }
+            }
+        }
+    }
+
 </style>
