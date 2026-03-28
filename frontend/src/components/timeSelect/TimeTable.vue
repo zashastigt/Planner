@@ -127,15 +127,12 @@
         const endHoursAndMinutes = seperateHourAndMinutes(selectionLargestTime)
         const selectionEndDate = selectionLargestDate.hour(endHoursAndMinutes.hours).minute(endHoursAndMinutes.minutes)
 
-        if (currentCell.dst !== 0 ) {
-            if (firstCellMinutes <= currentCellMinutes + dstHour) selectionLargestTime += dstHour
-            selectionStartDate = selectionStartDate.subtract(1, 'h')
-        }
+        if (currentCell.dst !== 0 && firstCellMinutes <= currentCellMinutes + dstHour) selectionLargestTime += dstHour
 
         _.each(temporaryCells.value, (cell)=>{
             const startTime = dayjs.unix(cell.startTime)
-            const isBeforeSelection = startTime.isBefore(selectionStartDate) || toMinutes(startTime) < selectionSmallestTime
-            const isAfterSelection = startTime.isAfter(selectionEndDate) || toMinutes(startTime) > selectionLargestTime
+            const isBeforeSelection = startTime.isBefore(selectionStartDate, 'day') || toMinutes(startTime) < selectionSmallestTime
+            const isAfterSelection = startTime.isAfter(selectionEndDate, 'day') || toMinutes(startTime) > selectionLargestTime
             
             const selected = !(isBeforeSelection || isAfterSelection)
 
