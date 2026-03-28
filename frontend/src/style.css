@@ -1,7 +1,7 @@
 :root {
   --bg-color: #151515;
   --black: black;
-  --dark-gray: rgb(38, 38, 38);
+  --dark-gray: rgb(44, 44, 44);
   --dark-medium-gray: #3b3b3b;
   --medium-gray: rgb(110, 110, 110);
   --light-gray: rgb(195, 195, 195);
@@ -9,6 +9,7 @@
 
   --small-lightening:rgba(255, 255, 255, 0.15);
   --medium-lightening:rgba(255, 255, 255, 0.5);
+  --shadow: #0a0a0a;
 
   font-family: 'Courier New', Courier, monospace, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

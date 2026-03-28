@@ -123,6 +123,7 @@
             width: 50%;
             padding: 0 30px;
             height: max-content;
+            
             &.left {
                 justify-content: flex-end;
             }
