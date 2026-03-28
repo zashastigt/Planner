@@ -33,24 +33,22 @@
         ref="cell"
         :class="`
             timeCell
-            ${props.dst ? ' dst' : props.selected ? ' selected' : (showGradient && props.names.length ? ' partially-selected': ' not-selected')}
+            ${props.dst !== 0 ? ' dst' : props.selected ? ' selected' : (showGradient && props.names.length ? ' partially-selected': ' not-selected')}
             ${editable ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
         @mousedown="()=>{
-            if(props.dst) return
+            if(props.dst !== 0) return
             selecting = true
-            emit('mouseDown', {startTime, endTime, selected})
+            emit('mouseDown', {startTime, endTime, selected, dst})
         }"
         @mouseover="(e)=>{
-            if(props.dst) return
             selecting = e.buttons === 1
-            emit('mouseOver', {startTime, endTime, selected}, cellComponent)
+            emit('mouseOver', {startTime, endTime, selected, dst}, cellComponent)
         }"
         @mouseup="()=>{
-            if(props.dst) return
             selecting = false
-            emit('mouseUp', {startTime, endTime, selected})
+            emit('mouseUp', {startTime, endTime, selected, dst})
         }"
     >
     </div>
@@ -87,7 +85,7 @@
             }
         }
         &.editable{
-            &:not(.selecting){
+            &:not(.selecting, .dst){
                 &:hover{
                     background-color: rgb(from var(--planner-color) r g b / .5);
                 }
@@ -102,7 +100,7 @@
             }
         }
         &.dst{
-            pointer-events: none;
+            
             background-color: white;
         }
     }
