@@ -100,7 +100,6 @@
             }
         }
         &.dst{
-            
             background-color: white;
         }
     }

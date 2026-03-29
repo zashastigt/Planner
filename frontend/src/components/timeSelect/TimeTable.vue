@@ -58,6 +58,7 @@
                 cells.value[currentUnix + index] = {
                     ...baseCell,
                     startTime: currentUnix + index * props.timeInterval * hourInMinutes,
+                    names: [],
                     dst: currentDate.utcOffset() > newDate.utcOffset() ? 1 : -1
                 }
             }
