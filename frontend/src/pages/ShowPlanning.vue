@@ -143,10 +143,14 @@
                 width: 100%;
                 margin: 2% 0;
                 &.left {
+                    align-items: center;
                     justify-content: center;
+                    flex-direction: column;
                 }
                 &.right {
+                    align-items: center;
                     justify-content: center;
+                    flex-direction: column-reverse;
                 }
             }
         }

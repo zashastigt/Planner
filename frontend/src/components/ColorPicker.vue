@@ -65,4 +65,10 @@ watch(color, ()=>emit("change", color.value))
             height: 25px;
         }
     }
+
+    @media (max-width: 600px) {
+        .colorMenu {
+            border-radius: 20px 20px 0 0;
+        }
+    }
 </style>

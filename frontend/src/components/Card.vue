@@ -23,7 +23,6 @@ const props = defineProps([
         overflow: hidden;
         position: relative;
         isolation: isolate;
-        /* box-shadow: 10px 5px 5px var(--shadow); */
 
         .header {
             height: 25px;

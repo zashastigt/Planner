@@ -109,4 +109,16 @@
             }
         }
     }
+
+    @media (max-width: 600px) {
+        .options{ 
+            .optionsButton {
+                border-radius: 20px 20px 0 0;
+            }
+            .optionSelection {
+                border-radius: 20px 20px 0 0;
+            }
+        }
+        
+    }
 </style>
