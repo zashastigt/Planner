@@ -1,6 +1,7 @@
 <script setup>
     import dayjs from 'dayjs'
     import minmax from 'dayjs/plugin/minMax'
+    import utc from 'dayjs/plugin/utc'
     import _ from 'lodash'
     import TimeCell from './TimeCell.vue'
     import {ref, watch, onBeforeMount, computed, getCurrentInstance, useTemplateRef} from 'vue'
@@ -10,6 +11,7 @@
     
     dayjs.extend(minmax)
     dayjs.extend(isBetween)
+    dayjs.extend(utc)
 
     const props = defineProps([
         "startDate",
@@ -32,6 +34,7 @@
     const maxNames  = computed(()=>_.reduce(props.cells, (acc, cell)=>Math.max(cell.names?.length, acc), 0))
     
     const hours = []
+    const hourInMinutes = 60
     let currentDate = startDate
     while(currentDate.diff(endDate) < 0){
         
@@ -39,12 +42,30 @@
         if(!hours.includes(hour)) hours.push(hour)
 
         const newDate = currentDate.add(props.timeInterval, "minute")
-        cells.value[currentDate.unix()] = {
-            startTime: currentDate.unix(),
+        
+        const currentUnix = currentDate.unix()
+        const baseCell = {
+            startTime: currentUnix,
             endTime: newDate.unix(),
             selected: false,
-            names: []
+            names: [],
+            dst: 0
         }
+        
+        if (currentDate.utcOffset() !== newDate.utcOffset())
+        {
+            for (let index = 1; index <= (hourInMinutes / props.timeInterval); index++) {
+                cells.value[currentUnix + index] = {
+                    ...baseCell,
+                    startTime: currentUnix + index * props.timeInterval * hourInMinutes,
+                    names: [],
+                    dst: currentDate.utcOffset() > newDate.utcOffset() ? 1 : -1
+                }
+            }
+        }
+        
+        cells.value[currentUnix] = baseCell
+
         currentDate = newDate 
     }
     const emptyCells = cells.value
@@ -83,34 +104,43 @@
     
     let temporaryCells = ref({})
     function onMouseOver(currentCell){
-        if(!firstCell) return;
+        if(!firstCell || !currentCell) return;
 
         temporaryCells.value = _.cloneDeep(cells.value)
 
         const unixFirstCell = dayjs.unix(firstCell.startTime)
-        const unixCurrentCell =  dayjs.unix(currentCell.startTime)
-        
-        const selectionSmallestTime = Math.min(unixFirstCell.format("HHmm"), unixCurrentCell.format("HHmm"))
-        const selectionLargestTime = Math.max(unixFirstCell.format("HHmm"), unixCurrentCell.format("HHmm"))
-        
+        const firstCellMinutes = toMinutes(unixFirstCell)
+        const unixCurrentCell =  dayjs.unix(currentCell.startTime) 
+        const currentCellMinutes = toMinutes(unixCurrentCell)
+
+        const dstHour = currentCell.dst !== 0 ? currentCell.dst * hourInMinutes : 0;
+        const currentCellMinutesDst = firstCellMinutes > currentCellMinutes + dstHour ? currentCellMinutes + dstHour : currentCellMinutes
+
+        const selectionSmallestTime = Math.min(firstCellMinutes,currentCellMinutesDst)
+        let selectionLargestTime = Math.max(firstCellMinutes,currentCellMinutesDst)
+
         const selectionSmallestDate = dayjs.min(unixFirstCell,unixCurrentCell)
         const selectionLargestDate = dayjs.max(unixFirstCell,unixCurrentCell)
         
         const startHoursAndMinutes = seperateHourAndMinutes(selectionSmallestTime)
-        const selectionStartDate = selectionSmallestDate.hour(startHoursAndMinutes[0]).minute(startHoursAndMinutes[1])
+        let selectionStartDate = selectionSmallestDate.hour(startHoursAndMinutes.hours).minute(startHoursAndMinutes.minutes)
 
         const endHoursAndMinutes = seperateHourAndMinutes(selectionLargestTime)
-        const selectionEndDate = selectionLargestDate.hour(endHoursAndMinutes[0]).minute(endHoursAndMinutes[1])
-        
+        const selectionEndDate = selectionLargestDate.hour(endHoursAndMinutes.hours).minute(endHoursAndMinutes.minutes)
+
+        if (currentCell.dst !== 0 && firstCellMinutes <= currentCellMinutes + dstHour) selectionLargestTime += dstHour
+
         _.each(temporaryCells.value, (cell)=>{
             const startTime = dayjs.unix(cell.startTime)
-            const isBeforeSelection = startTime.isBefore(selectionStartDate) || startTime.format("HHmm") < selectionStartDate.format("HHmm")
-            const isAfterSelection = startTime.isAfter(selectionEndDate) || startTime.format("HHmm") > selectionEndDate.format("HHmm")
-
+            const isBeforeSelection = startTime.isBefore(selectionStartDate, 'day') || toMinutes(startTime) < selectionSmallestTime
+            const isAfterSelection = startTime.isAfter(selectionEndDate, 'day') || toMinutes(startTime) > selectionLargestTime
+            
             const selected = !(isBeforeSelection || isAfterSelection)
 
             if(!selected) cell = undefined
-            else cell.selected = firstCell.selected
+            else {
+                if(cell.dst === 0) cell.selected = firstCell.selected
+            }
         })
 
         temporaryCells.value = _.merge(_.cloneDeep(cells.value), _.pickBy(temporaryCells.value, cell=>cell.selected == firstCell.selected))
@@ -125,9 +155,12 @@
         emit("edited", cells.value)
     }
 
-    function seperateHourAndMinutes(time) {
-        time = String(time)
-        return [time.slice(0, -2), time.slice(-2)]
+    const toMinutes = (time) => time.hour() * hourInMinutes + time.minute()
+    const seperateHourAndMinutes = (totalMinutes) => {
+        const hours = Math.floor(totalMinutes / hourInMinutes)
+        const minutes = totalMinutes % hourInMinutes
+
+        return { hours, minutes }
     }
 
     const {showGradient, showUnavailable} = storeToRefs(settingsStore)
@@ -167,6 +200,8 @@
                 :endTime="cell.endTime"
                 :selected="cell.selected"
                 :names="cell.names"
+                :dst="cell.dst"
+                :dstTime="cell.dstTime"
                 @[editable&&'mouseDown']="cell=>onMouseDown(cell)"
                 @[editable&&'mouseOver']="cell=>onMouseOver(cell)"
                 @[editable&&'mouseUp']="cell=>onMouseUp(cell)"
