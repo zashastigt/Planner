@@ -25,14 +25,17 @@
         </button>
 
         <div v-if="optionsOpen && !optionsModalOpen" class="optionSelection">
-            <button class="back" @click="optionsOpen=false">< Close</button>
+            <div class="title">
+                <div class="back"  @click="optionsOpen=false"><</div> 
+                <span>Options</span>
+            </div>
             <button @click="showCellColorOption = !showCellColorOption">Change cell colors</button>
-            <label>
+            <label class="checkbox">
                 <input v-model="showGradient" type="checkbox">
                 <span>Show gradient</span>
             </label>
             <button v-if="showGradient" @click="showGradientColorOption = !showGradientColorOption">Change gradient color</button>
-            <label>
+            <label class="checkbox">
                 <input v-model="showUnavailable" type="checkbox">
                 <span>Show unavailable</span>
             </label>
@@ -44,13 +47,13 @@
                 :defaultColor="settingsStore.color"
                 @change="color=>settingsStore.color = color" 
                 @close="showCellColorOption=false"
-                >Choose cell color</ColorPicker>
+                >Cell color</ColorPicker>
             <ColorPicker 
                 v-if="showGradientColorOption" 
                 :defaultColor="settingsStore.gradient"
                 @change="color=>settingsStore.gradient = color" 
                 @close="showGradientColorOption=false"
-            >Choose gradient color</ColorPicker>
+            >Gradient color</ColorPicker>
         </div>
     </section>
 </template>
@@ -61,37 +64,61 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: var(--dark-gray);
+            background-color: var(--light-gray);
             color: var(--black);
-            border: 1px solid var(--light-gray);
+            border: none;
             border-radius: 0 20px 20px 0;
             overflow: hidden;
             padding: 5px;
             svg{
                 width: 30px;
-                fill: white;
+                fill: var(--dark-gray);
             }
         }
         .optionSelection{
-            display: grid;
-            justify-items: start;
-            padding: 10px;
-            border: 1px solid white;
-            gap: 5px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--dark-gray);
+            color: var(--black);
+            border-radius: 0 20px 20px 0;
+            overflow: hidden;
 
             *{
                 font-size: 16px;
             }
-            .back{
-                display: inline-block;
-                width: 100%;
-                border: none;
-                background: none;
-                cursor: pointer;
-                border-bottom: 1px solid white;
-                padding-bottom: 5px;
-                margin-bottom: 5px;
+            .title {
+                display: flex;
+                height: 25px;
+                background-color: var(--light-gray);
+                color: var(--black);
+                user-select: none;
+                &:hover {
+                    background-color: var(--light-gray);
+                    color: var(--black);
+                }
+                .back {
+                    margin-right: 5px;
+                    border-right: 5px var(--bg-color) solid;
+                    width: 30px;
+                    height: 25px;
+                }
+            }
+            .checkbox {
+                color: var(--light-gray);
+                margin: 0 10px;
             }
         }
+    }
+
+    @media (max-width: 600px) {
+        .options{ 
+            .optionsButton {
+                border-radius: 20px 20px 0 0;
+            }
+            .optionSelection {
+                border-radius: 20px 20px 0 0;
+            }
+        }
+        
     }
 </style>

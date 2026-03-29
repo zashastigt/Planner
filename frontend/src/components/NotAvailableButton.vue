@@ -34,4 +34,10 @@ const props = defineProps([
             }
         }
     }
+
+    @media (max-width: 600px) {
+        .colorMenu {
+            border-radius: 20px 20px 0 0;
+        }
+    }
 </style>

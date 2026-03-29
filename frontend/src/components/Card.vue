@@ -19,8 +19,6 @@ const props = defineProps([
     .card {
         width: fit-content;
         color: var(--black);
-        border: 1px solid var(--light-gray);
-        background-color: var(--light-gray);
         border-radius: 20px 20px 0 20px;
         overflow: hidden;
         position: relative;
