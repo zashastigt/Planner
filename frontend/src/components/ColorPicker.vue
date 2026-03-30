@@ -60,9 +60,11 @@ watch(color, ()=>emit("change", color.value))
         }
         .back {
             margin-right: 5px;
-            border-right: 5px var(--bg-color) solid;
             width: 30px;
             height: 25px;
+            &:hover {
+                background-color: var(--medium-gray);
+            }
         }
     }
 
