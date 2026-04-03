@@ -123,6 +123,7 @@
             width: 50%;
             padding: 0 30px;
             height: max-content;
+            
             &.left {
                 justify-content: flex-end;
             }
@@ -131,4 +132,28 @@
             }
         }
     }
+
+    @media (max-width: 600px) {
+        .availability {
+            flex-direction: column;
+            height: auto;
+            
+
+            .side {
+                width: 100%;
+                margin: 2% 0;
+                &.left {
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                }
+                &.right {
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column-reverse;
+                }
+            }
+        }
+    }
+
 </style>

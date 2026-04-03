@@ -18,8 +18,10 @@ watch(color, ()=>emit("change", color.value))
 
 <template>
     <div class="colorMenu picker">
-        <div class="title" @click="()=>emit('close')">
-            <div>< <slot/></div> 
+        <div class="title">
+            <div class="back"  @click="()=>emit('close')"><</div> 
+            <slot/>
+                
         </div>
         <ChromePicker v-model="color" />
     </div>
@@ -29,7 +31,6 @@ watch(color, ()=>emit("change", color.value))
     .colorMenu {
         background-color: var(--dark-gray);
         color: var(--black);
-        border: 1px solid var(--light-gray);
         border-radius: 0 20px 20px 0;
         overflow: hidden;
     }
@@ -48,6 +49,7 @@ watch(color, ()=>emit("change", color.value))
     }
 
     .title {
+        display: flex;
         height: 25px;
         background-color: var(--light-gray);
         color: var(--black);
@@ -55,6 +57,20 @@ watch(color, ()=>emit("change", color.value))
         &:hover {
             background-color: var(--light-gray);
             color: var(--black);
+        }
+        .back {
+            margin-right: 5px;
+            width: 30px;
+            height: 25px;
+            &:hover {
+                background-color: var(--medium-gray);
+            }
+        }
+    }
+
+    @media (max-width: 600px) {
+        .colorMenu {
+            border-radius: 20px 20px 0 0;
         }
     }
 </style>
