@@ -13,7 +13,7 @@ export class Availability {
     })
     planning: Planning
 
-    @Column()
+    @Column({ collation: "utf8mb4_bin"})
     name: string
 
     @OneToMany(() => Time, (time) => time.availability)
