@@ -11,20 +11,25 @@
     ])
     
     const emit = defineEmits([
-        "mouseDown",
-        "mouseOver",
-        "mouseUp"
+        "pointerDown",
+        "pointerMove",
+        "pointerUp"
     ])
     
     const editable = computed(()=>{
-        return getCurrentInstance()?.vnode.props.onMouseDown
-        && getCurrentInstance()?.vnode.props.onMouseOver
-        && getCurrentInstance()?.vnode.props.onMouseUp
+        return getCurrentInstance()?.vnode.props.onPointerDown
+        && getCurrentInstance()?.vnode.props.onPointerMove
+        && getCurrentInstance()?.vnode.props.onPointerUp
     });
     
     const cellComponent = useTemplateRef('cell')
     const {showGradient} = storeToRefs(useSettingsStore())
     const selecting = ref(false)
+
+    function handle(eventName, isSelecting, args = undefined) {
+        const {startTime, endTime, selected} = props
+        emit(eventName, {startTime, endTime, selected}, args)
+    }
 
 </script>
 <template>
@@ -36,18 +41,9 @@
             ${editable ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
-        @mousedown="()=>{
-            selecting = true
-            emit('mouseDown', {startTime, endTime, selected})
-        }"
-        @mouseover="(e)=>{
-            selecting = e.buttons === 1
-            emit('mouseOver', {startTime, endTime, selected}, cellComponent)
-        }"
-        @mouseup="()=>{
-            selecting = false
-            emit('mouseUp', {startTime, endTime, selected})
-        }"
+        @pointerdown="(e) => handle('pointerDown', true, e)"
+        @pointermove="(e) => handle('pointerMove', e.buttons === 1 || e.pointerType === 'touch', cellComponent)"
+        @pointerup="handle('pointerUp', false)"
     >
     </div>
 </template>
@@ -58,6 +54,7 @@
         height: 8px;
         border-right: 1px solid var(--table-border-color);
         font-size: 40%;
+        pointer-events: auto;
         
         &:nth-child(4n){
             border-bottom: 1px solid var(--table-border-color);

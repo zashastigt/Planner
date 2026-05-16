@@ -75,10 +75,11 @@
 
 
     let firstCell = null
-    function onMouseDown(cell){
+    function onMouseDown(cell, e = undefined){
+        if (e) e.target.releasePointerCapture(e.pointerId)
         cells.value[cell.startTime].selected = !cell.selected
         firstCell = cells.value[cell.startTime]
-        this.onMouseOver(firstCell)
+        onMouseOver(firstCell)
     }
     
     let temporaryCells = ref({})
@@ -151,7 +152,7 @@
 </script>
 
 <template>
-    <section class="timeTable">
+    <section class="timeTable" oncontextmenu="return false;">
         <header class="days">
             <div v-for="day in days" class="day" :innerHTML="day"></div>
         </header>
@@ -159,7 +160,7 @@
             <div v-for="hour in hours" class="hour">{{ hour }}</div>
         </aside>
         <div class="cells"
-            @mouseleave="()=>onMouseUp(null)"
+            @pointerleave="()=>onMouseUp(null)"
         >
             <TimeCell v-for="cell in _.size(temporaryCells) ? temporaryCells : cells"
                 :key="cell.startTime"
@@ -167,10 +168,10 @@
                 :endTime="cell.endTime"
                 :selected="cell.selected"
                 :names="cell.names"
-                @[editable&&'mouseDown']="cell=>onMouseDown(cell)"
-                @[editable&&'mouseOver']="cell=>onMouseOver(cell)"
-                @[editable&&'mouseUp']="cell=>onMouseUp(cell)"
-                @[!editable&&'mouseOver']="(_, cellComponent)=>showNamesSelected(cell, cellComponent)"
+                @[editable&&'pointerMove']="cell=>onMouseOver(cell)"
+                @[editable&&'pointerDown']="(cell, e)=>onMouseDown(cell, e)"
+                @[editable&&'pointerUp']="cell=>onMouseUp(cell)"
+                @[!editable&&'pointerMove']="(_, cellComponent)=>showNamesSelected(cell, cellComponent)"
             />
         </div>
         <dialog class="namesPopup" ref="namesPopup" v-show="!editable && currentNames.length">
@@ -190,6 +191,7 @@
         padding: 10px;
         color: white;
         min-width: max-content;
+        touch-action: none;
 
         .days{
             display: grid;
