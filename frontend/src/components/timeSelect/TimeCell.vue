@@ -7,7 +7,8 @@
         "startTime",
         "endTime",
         "selected",
-        "names"
+        "names",
+        "dst"
     ])
     
     const emit = defineEmits([
@@ -27,8 +28,8 @@
     const selecting = ref(false)
 
     function handle(eventName, isSelecting, args = undefined) {
-        const {startTime, endTime, selected} = props
-        emit(eventName, {startTime, endTime, selected}, args)
+        const {startTime, endTime, selected, dst} = props
+        emit(eventName, {startTime, endTime, selected, dst}, args)
     }
 
 </script>
@@ -37,11 +38,13 @@
         ref="cell"
         :class="`
             timeCell
-            ${props.selected ? ' selected' : (showGradient && props.names.length ? ' partially-selected': ' not-selected')}
+            ${props.dst !== 0 ? ' dst' : props.selected ? ' selected' : (showGradient && props.names.length ? ' partially-selected': ' not-selected')}
             ${editable ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
-        @pointerdown="(e) => handle('pointerDown', true, e)"
+        @pointerdown="(e) => {
+            if(props.dst !== 0) return;
+            handle('pointerDown', true, e)}"
         @pointermove="(e) => handle('pointerMove', e.buttons === 1 || e.pointerType === 'touch', cellComponent)"
         @pointerup="handle('pointerUp', false)"
     >
@@ -80,7 +83,7 @@
             }
         }
         &.editable{
-            &:not(.selecting){
+            &:not(.selecting, .dst){
                 &:hover{
                     background-color: rgb(from var(--planner-color) r g b / .5);
                 }
@@ -93,6 +96,9 @@
             &.not-selected:hover{
                 background-color: hsl(from var(--planner-color) h s l / .5);
             }
+        }
+        &.dst{
+            background-color: white;
         }
     }
 </style>
