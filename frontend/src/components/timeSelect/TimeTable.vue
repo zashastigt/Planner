@@ -96,10 +96,11 @@
 
 
     let firstCell = null
-    function onMouseDown(cell){
+    function onMouseDown(cell, e = undefined){
+        if (e) e.target.releasePointerCapture(e.pointerId)
         cells.value[cell.startTime].selected = !cell.selected
         firstCell = cells.value[cell.startTime]
-        this.onMouseOver(firstCell)
+        onMouseOver(firstCell)
     }
     
     let temporaryCells = ref({})
@@ -181,10 +182,18 @@
         namesPopupElement.style.setProperty("--names-popup-color", `linear-gradient(${backgroundColor}, ${backgroundColor}), var(--dark-gray)`)
     }
 
+    function checkPointerType(cellData, e, cellComponent) {
+        if (e.pointerType === 'touch') {
+            e.target.releasePointerCapture(e.pointerId)
+            showNamesSelected(cellData, cellComponent)
+        }
+        else requestAnimationFrame(()=>showNamesSelected(cellData, cellComponent))
+    }
+
 </script>
 
 <template>
-    <section class="timeTable">
+    <section class="timeTable" oncontextmenu="return false;">
         <header class="days">
             <div v-for="day in days" class="day" :innerHTML="day"></div>
         </header>
@@ -192,7 +201,7 @@
             <div v-for="hour in hours" class="hour">{{ hour }}</div>
         </aside>
         <div class="cells"
-            @mouseleave="()=>onMouseUp(null)"
+            @pointerleave="()=>onMouseUp(null)"
         >
             <TimeCell v-for="cell in _.size(temporaryCells) ? temporaryCells : cells"
                 :key="cell.startTime"
@@ -202,10 +211,10 @@
                 :names="cell.names"
                 :dst="cell.dst"
                 :dstTime="cell.dstTime"
-                @[editable&&'mouseDown']="cell=>onMouseDown(cell)"
-                @[editable&&'mouseOver']="cell=>onMouseOver(cell)"
-                @[editable&&'mouseUp']="cell=>onMouseUp(cell)"
-                @[!editable&&'mouseOver']="(_, cellComponent)=>showNamesSelected(cell, cellComponent)"
+                @[editable&&'pointerDown']="(cell, e)=>onMouseDown(cell, e)"
+                @[editable&&'pointerMove']="(cell, e)=>onMouseOver(cell)"
+                @[editable&&'pointerUp']="cell=>onMouseUp(cell)"
+                @[!editable&&'pointerMove']="(_, e, cellComponent)=>checkPointerType(cell, e, cellComponent)"
             />
         </div>
         <dialog class="namesPopup" ref="namesPopup" v-show="!editable && currentNames.length">

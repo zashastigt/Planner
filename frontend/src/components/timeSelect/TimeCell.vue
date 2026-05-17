@@ -12,15 +12,15 @@
     ])
     
     const emit = defineEmits([
-        "mouseDown",
-        "mouseOver",
-        "mouseUp"
+        "pointerDown",
+        "pointerMove",
+        "pointerUp"
     ])
     
     const editable = computed(()=>{
-        return getCurrentInstance()?.vnode.props.onMouseDown
-        && getCurrentInstance()?.vnode.props.onMouseOver
-        && getCurrentInstance()?.vnode.props.onMouseUp
+        return getCurrentInstance()?.vnode.props.onPointerDown
+        && getCurrentInstance()?.vnode.props.onPointerMove
+        && getCurrentInstance()?.vnode.props.onPointerUp
     });
     
     const cellComponent = useTemplateRef('cell')
@@ -37,18 +37,18 @@
             ${editable ? ' editable' : ''}
             ${selecting ? ' selecting' : ''}
         `"
-        @mousedown="()=>{
-            if(props.dst !== 0) return
-            selecting = true
-            emit('mouseDown', {startTime, endTime, selected, dst})
-        }"
-        @mouseover="(e)=>{
-            selecting = e.buttons === 1
-            emit('mouseOver', {startTime, endTime, selected, dst}, cellComponent)
-        }"
-        @mouseup="()=>{
+        @pointerdown="(e) => {
+            if(props.dst !== 0) return;
+            selecting = editable
+            emit('pointerDown', {startTime, endTime, selected, dst}, e)
+        }""
+        @pointermove="(e) => {
+            selecting = editable && e.buttons === 1
+            emit('pointerMove', {startTime, endTime, selected, dst}, e, cellComponent)
+            }"
+        @pointerup="()=>{
             selecting = false
-            emit('mouseUp', {startTime, endTime, selected, dst})
+            emit('pointerUp', {startTime, endTime, selected, dst})
         }"
     >
     </div>
@@ -60,6 +60,8 @@
         height: 8px;
         border-right: 1px solid var(--table-border-color);
         font-size: 40%;
+        pointer-events: auto;
+        touch-action: none;
         
         &:nth-child(4n){
             border-bottom: 1px solid var(--table-border-color);
@@ -73,21 +75,27 @@
             }
             &.partially-selected{
                 background-color: hsl(from var(--planner-gradient-color) h s l / var(--selection-range));
-                &:hover{
-                    background-color: hsl(from var(--planner-gradient-color) h s l / calc(var(--selection-range) * .5));
+                @media (hover: hover) {
+                    &:hover{
+                        background-color: hsl(from var(--planner-gradient-color) h s l / calc(var(--selection-range) * .5));
+                    }
                 }
             }
             &.selected{
                 background-color: var(--planner-color);
-                &:hover{
-                    background-color: rgb(from var(--planner-color) r g b / .5);
+                @media (hover: hover) {
+                    &:hover{
+                        background-color: rgb(from var(--planner-color) r g b / .5);
+                    }
                 }
             }
         }
         &.editable{
             &:not(.selecting, .dst){
-                &:hover{
-                    background-color: rgb(from var(--planner-color) r g b / .5);
+                @media (hover: hover) {
+                    &:hover{
+                        background-color: rgb(from var(--planner-color) r g b / .5);
+                    }
                 }
             }
             &.selected{
@@ -95,8 +103,10 @@
             }
         }
         &.editable:not(.selecting){
-            &.not-selected:hover{
-                background-color: hsl(from var(--planner-color) h s l / .5);
+            @media (hover: hover) {
+                &.not-selected:hover{
+                    background-color: hsl(from var(--planner-color) h s l / .5);
+                }
             }
         }
         &.dst{
