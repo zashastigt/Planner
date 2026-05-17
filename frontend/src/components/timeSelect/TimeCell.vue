@@ -27,11 +27,6 @@
     const {showGradient} = storeToRefs(useSettingsStore())
     const selecting = ref(false)
 
-    function handle(eventName, isSelecting, args = undefined) {
-        const {startTime, endTime, selected, dst} = props
-        emit(eventName, {startTime, endTime, selected, dst}, args)
-    }
-
 </script>
 <template>
     <div 
@@ -44,9 +39,17 @@
         `"
         @pointerdown="(e) => {
             if(props.dst !== 0) return;
-            handle('pointerDown', true, e)}"
-        @pointermove="(e) => handle('pointerMove', e.buttons === 1 || e.pointerType === 'touch', cellComponent)"
-        @pointerup="handle('pointerUp', false)"
+            selecting = editable
+            emit('pointerDown', {startTime, endTime, selected, dst}, e)
+        }""
+        @pointermove="(e) => {
+            selecting = editable && e.buttons === 1
+            emit('pointerMove', {startTime, endTime, selected, dst}, e, cellComponent)
+            }"
+        @pointerup="()=>{
+            selecting = false
+            emit('pointerUp', {startTime, endTime, selected, dst})
+        }"
     >
     </div>
 </template>
@@ -58,6 +61,7 @@
         border-right: 1px solid var(--table-border-color);
         font-size: 40%;
         pointer-events: auto;
+        touch-action: none;
         
         &:nth-child(4n){
             border-bottom: 1px solid var(--table-border-color);
@@ -71,21 +75,27 @@
             }
             &.partially-selected{
                 background-color: hsl(from var(--planner-gradient-color) h s l / var(--selection-range));
-                &:hover{
-                    background-color: hsl(from var(--planner-gradient-color) h s l / calc(var(--selection-range) * .5));
+                @media (hover: hover) {
+                    &:hover{
+                        background-color: hsl(from var(--planner-gradient-color) h s l / calc(var(--selection-range) * .5));
+                    }
                 }
             }
             &.selected{
                 background-color: var(--planner-color);
-                &:hover{
-                    background-color: rgb(from var(--planner-color) r g b / .5);
+                @media (hover: hover) {
+                    &:hover{
+                        background-color: rgb(from var(--planner-color) r g b / .5);
+                    }
                 }
             }
         }
         &.editable{
             &:not(.selecting, .dst){
-                &:hover{
-                    background-color: rgb(from var(--planner-color) r g b / .5);
+                @media (hover: hover) {
+                    &:hover{
+                        background-color: rgb(from var(--planner-color) r g b / .5);
+                    }
                 }
             }
             &.selected{
@@ -93,8 +103,10 @@
             }
         }
         &.editable:not(.selecting){
-            &.not-selected:hover{
-                background-color: hsl(from var(--planner-color) h s l / .5);
+            @media (hover: hover) {
+                &.not-selected:hover{
+                    background-color: hsl(from var(--planner-color) h s l / .5);
+                }
             }
         }
         &.dst{

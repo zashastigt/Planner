@@ -182,6 +182,14 @@
         namesPopupElement.style.setProperty("--names-popup-color", `linear-gradient(${backgroundColor}, ${backgroundColor}), var(--dark-gray)`)
     }
 
+    function checkPointerType(cellData, e, cellComponent) {
+        if (e.pointerType === 'touch') {
+            e.target.releasePointerCapture(e.pointerId)
+            showNamesSelected(cellData, cellComponent)
+        }
+        else requestAnimationFrame(()=>showNamesSelected(cellData, cellComponent))
+    }
+
 </script>
 
 <template>
@@ -203,10 +211,10 @@
                 :names="cell.names"
                 :dst="cell.dst"
                 :dstTime="cell.dstTime"
-                @[editable&&'pointerMove']="cell=>onMouseOver(cell)"
                 @[editable&&'pointerDown']="(cell, e)=>onMouseDown(cell, e)"
+                @[editable&&'pointerMove']="(cell, e)=>onMouseOver(cell)"
                 @[editable&&'pointerUp']="cell=>onMouseUp(cell)"
-                @[!editable&&'pointerMove']="(_, cellComponent)=>showNamesSelected(cell, cellComponent)"
+                @[!editable&&'pointerMove']="(_, e, cellComponent)=>checkPointerType(cell, e, cellComponent)"
             />
         </div>
         <dialog class="namesPopup" ref="namesPopup" v-show="!editable && currentNames.length">
@@ -226,7 +234,6 @@
         padding: 10px;
         color: white;
         min-width: max-content;
-        touch-action: none;
 
         .days{
             display: grid;
