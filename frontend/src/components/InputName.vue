@@ -12,8 +12,7 @@ const name = ref("")
 const hasLink = ref(false)
 
 function updateNameCheck() {
-    if (linkify.test(name.value)) 
-    {
+    if (linkify.find(name.value).length){
         hasLink.value = true
         return
     }
