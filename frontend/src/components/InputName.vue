@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import * as linkify from 'linkifyjs';
 
 const props = defineProps([
     'nameCheck'
@@ -8,8 +9,16 @@ const props = defineProps([
 const emit = defineEmits()
 
 const name = ref("")
+const hasLink = ref(false)
 
 function updateNameCheck() {
+    if (linkify.test(name.value)) 
+    {
+        hasLink.value = true
+        return
+    }
+
+    hasLink.value = false
     emit('updateNameCheck', name.value)
 }
 
@@ -20,6 +29,7 @@ function handleKeyUp(event) {
 </script>
 
 <template>
+    <div class="notAllowed" v-if="hasLink">Links are not allowed.</div>
     <div class="inputName">
         <input type="text" v-model="name" @keyup="handleKeyUp"></input>
         <button @click="updateNameCheck" >
@@ -68,5 +78,9 @@ function handleKeyUp(event) {
                 margin-top: 5px;
             }
         }
+    }
+
+    .notAllowed {
+        color: white;
     }
 </style>

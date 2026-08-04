@@ -12,6 +12,7 @@
     "@popperjs/core": "^2.11.8",
     "dayjs": "^1.11.19",
     "dayjs-plugin-utc": "^0.1.2",
+    "linkifyjs": "^4.3.3",
     "pinia": "^3.0.3",
     "underscore": "^1.13.7",
     "underscore-contrib": "^0.3.0",
