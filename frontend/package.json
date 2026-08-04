@@ -15,7 +15,7 @@
     "linkifyjs": "^4.3.3",
     "pinia": "^3.0.3",
     "underscore": "^1.13.7",
-    "underscore-contrib": "^0.3.0",
+    "underscore-contrib": "^0.2.2",
     "v-calendar": "^3.1.2",
     "vue": "^3.5.22",
     "vue-color": "^3.3.3",
