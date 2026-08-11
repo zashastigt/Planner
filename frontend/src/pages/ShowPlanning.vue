@@ -10,9 +10,9 @@
     import { watch } from 'vue';
     import Settings from '../components/Settings.vue';
 
-    defineProps({
-        planningId: Number
-    })
+    const props = defineProps([
+        'planningId'
+    ])
 
     const name = ref("")
     const planning = ref(null)
