@@ -41,7 +41,7 @@
             if(props.dst !== 0) return;
             selecting = editable
             emit('pointerDown', {startTime, endTime, selected, dst}, e)
-        }""
+        }"
         @pointermove="(e) => {
             selecting = editable && e.buttons === 1
             emit('pointerMove', {startTime, endTime, selected, dst}, e, cellComponent)
