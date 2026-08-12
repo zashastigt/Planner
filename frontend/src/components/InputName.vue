@@ -6,7 +6,7 @@ const props = defineProps([
     'nameCheck'
 ])
 
-const emit = defineEmits()
+const emit = defineEmits(['updateNameCheck'])
 
 const name = ref("")
 const hasLink = ref(false)
